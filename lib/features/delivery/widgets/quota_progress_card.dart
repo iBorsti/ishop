@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
 class QuotaProgressCard extends StatelessWidget {
-  const QuotaProgressCard({super.key});
+  final num quota;
+  final num earned;
+
+  const QuotaProgressCard({super.key, required this.quota, required this.earned});
 
   @override
   Widget build(BuildContext context) {
-    const double quota = 1000;
-    const double earned = 850;
-    final progress = earned / quota;
+    final double q = quota == 0 ? 1.0 : quota.toDouble();
+    final double e = earned.toDouble();
+    final progress = (e / q).clamp(0.0, 1.0);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -42,7 +45,7 @@ class QuotaProgressCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'C\$ $earned / C\$ $quota',
+            'C\$ ${earned} / C\$ ${quota}',
             style: TextStyle(
               color: Colors.grey.shade600,
               fontSize: 14,
