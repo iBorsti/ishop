@@ -1,117 +1,21 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
+import 'services/buyer_service.dart';
+import 'widgets/product_card.dart';
 
 class BuyerFeed extends StatelessWidget {
   const BuyerFeed({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    final products = BuyerService.getFeedProducts();
+
+    return ListView.separated(
       padding: const EdgeInsets.all(12),
-      itemCount: 8,
+      itemCount: products.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // header
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: AppColors.primaryBlue,
-                      child: const Icon(Icons.person, color: Colors.white),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Tienda Ejemplo',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Hace 2 hrs',
-                          style: TextStyle(
-                            color: AppColors.textGray,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.more_horiz),
-                    ),
-                  ],
-                ),
-              ),
-              // image
-              Container(
-                height: 180,
-                decoration: BoxDecoration(
-                  color: AppColors.secondaryBlue,
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(12),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Producto destacado',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Descripción breve del producto',
-                      style: TextStyle(color: AppColors.textGray),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Semantics(
-                          button: true,
-                          label: 'Comprar producto',
-                          child: Tooltip(
-                            message: 'Añadir al carrito',
-                            child: ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.add_shopping_cart),
-                              label: const Text('Comprar'),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Semantics(
-                          button: true,
-                          label: 'Compartir producto',
-                          child: Tooltip(
-                            message: 'Compartir producto',
-                            child: OutlinedButton(
-                              onPressed: () {},
-                              child: const Text('Compartir'),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
+        final product = products[index];
+        return ProductCard(product: product);
       },
     );
   }

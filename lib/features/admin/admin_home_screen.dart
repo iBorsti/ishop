@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+import 'admin_dashboard.dart';
 
 class AdminHomeScreen extends StatelessWidget {
   const AdminHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Admin - Inicio')),
-      body: const Center(child: Text('Inicio admin')),
-    );
+    return const AdminDashboard();
   }
 }

@@ -4,6 +4,8 @@ import 'widgets/fleet_stat_section.dart';
 import 'widgets/quota_overview_card.dart';
 import 'widgets/fleet_map_placeholder.dart';
 import 'widgets/moto_status_card.dart';
+import '../../core/widgets/dashboard_scaffold.dart';
+import '../../core/widgets/dashboard_section_title.dart';
 
 class FleetDashboard extends StatelessWidget {
   const FleetDashboard({super.key});
@@ -12,23 +14,21 @@ class FleetDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final stats = FleetService.getStats();
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Flota')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FleetStatSection(stats: stats),
-            const SizedBox(height: 16),
-            QuotaOverviewCard(stats: stats),
-            const SizedBox(height: 16),
-            const FleetMapPlaceholder(),
-            const SizedBox(height: 16),
-            MotoStatusList(),
-          ],
-        ),
-      ),
+    return DashboardScaffold(
+      title: 'Flota',
+      children: [
+        const DashboardSectionTitle('Resumen'),
+        FleetStatSection(stats: stats),
+        const SizedBox(height: 16),
+        const DashboardSectionTitle('Cuotas'),
+        QuotaOverviewCard(stats: stats),
+        const SizedBox(height: 16),
+        const DashboardSectionTitle('Mapa'),
+        const FleetMapPlaceholder(),
+        const SizedBox(height: 16),
+        const DashboardSectionTitle('Motos'),
+        MotoStatusList(),
+      ],
     );
   }
 }
