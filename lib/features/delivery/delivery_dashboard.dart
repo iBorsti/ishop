@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/availability_provider.dart';
 import '../../core/widgets/animated_entry.dart';
-import '../../core/widgets/stat_card.dart';
+// removed unused import
 import 'widgets/availability_toggle.dart';
 import 'widgets/quota_progress_card.dart';
 import 'widgets/delivery_stat_section.dart';
 import '../../core/services/mock_api.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
-  const DeliveryDashboard({Key? key}) : super(key: key);
+  const DeliveryDashboard({super.key});
 
   @override
   ConsumerState<DeliveryDashboard> createState() => _DeliveryDashboardState();
@@ -49,10 +49,7 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
   Widget build(BuildContext context) {
     final available = ref.watch(availabilityProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Delivery'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Delivery'), elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -74,9 +71,14 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: available ? Colors.green.withAlpha(40) : Colors.grey.withAlpha(30),
+                      color: available
+                          ? Colors.green.withAlpha(40)
+                          : Colors.grey.withAlpha(30),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -94,7 +96,9 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
                         Text(
                           available ? 'Disponible' : 'No disponible',
                           style: TextStyle(
-                            color: available ? Colors.green[800] : Colors.grey[700],
+                            color: available
+                                ? Colors.green[800]
+                                : Colors.grey[700],
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -105,10 +109,16 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
                 const SizedBox(width: 12),
                 // Acción rápida para alternar disponibilidad
                 Tooltip(
-                  message: available ? 'Desactivar disponibilidad' : 'Activar disponibilidad',
+                  message: available
+                      ? 'Desactivar disponibilidad'
+                      : 'Activar disponibilidad',
                   child: TextButton.icon(
-                    onPressed: () => ref.read(availabilityProvider.notifier).toggle(),
-                    icon: Icon(available ? Icons.toggle_on : Icons.toggle_off, color: Theme.of(context).primaryColor),
+                    onPressed: () =>
+                        ref.read(availabilityProvider.notifier).toggle(),
+                    icon: Icon(
+                      available ? Icons.toggle_on : Icons.toggle_off,
+                      color: Theme.of(context).primaryColor,
+                    ),
                     label: Text(available ? 'Desactivar' : 'Activar'),
                   ),
                 ),
@@ -119,14 +129,20 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
 
             if (loading) ...[
               const SizedBox(height: 8),
-              const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
+              const SizedBox(
+                height: 200,
+                child: Center(child: CircularProgressIndicator()),
+              ),
             ] else if (error != null) ...[
               Center(
                 child: Column(
                   children: [
                     Text('Error: $error'),
                     const SizedBox(height: 8),
-                    ElevatedButton(onPressed: _load, child: const Text('Reintentar')),
+                    ElevatedButton(
+                      onPressed: _load,
+                      child: const Text('Reintentar'),
+                    ),
                   ],
                 ),
               ),

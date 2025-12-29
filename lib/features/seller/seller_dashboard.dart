@@ -19,10 +19,7 @@ class SellerDashboard extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Panel de Vendedor'),
-        elevation: 1,
-      ),
+      appBar: AppBar(title: const Text('Panel de Vendedor'), elevation: 1),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -31,26 +28,43 @@ class SellerDashboard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: StatCard(title: 'Ventas hoy', value: todaySales, icon: Icons.local_mall),
+                  child: StatCard(
+                    title: 'Ventas hoy',
+                    value: todaySales,
+                    icon: Icons.local_mall,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: StatCard(title: 'Ingresos mes', value: monthIncome, icon: Icons.attach_money),
+                  child: StatCard(
+                    title: 'Ingresos mes',
+                    value: monthIncome,
+                    icon: Icons.attach_money,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            StatCard(title: 'Productos vendidos', value: productsSold, icon: Icons.inventory_2),
+            StatCard(
+              title: 'Productos vendidos',
+              value: productsSold,
+              icon: Icons.inventory_2,
+            ),
             const SizedBox(height: 16),
             Card(
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Ventas (últimos 9 días)', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Ventas (últimos 9 días)',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 12),
                     Container(
                       height: 140,
@@ -63,38 +77,84 @@ class SellerDashboard extends StatelessWidget {
                         child: Column(
                           children: [
                             Expanded(
-                              child: SimpleLineChart(data: chartData, lineColor: Colors.white),
+                              child: SimpleLineChart(
+                                data: chartData,
+                                lineColor: Colors.white,
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.spaceBetween,
                       children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => const PublishProductScreen()));
-                          },
-                          icon: const Icon(Icons.post_add),
-                          label: const Text('Publicar producto'),
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryBlue),
+                        Semantics(
+                          button: true,
+                          label: 'Publicar producto',
+                          child: Tooltip(
+                            message: 'Crear una nueva publicación',
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const PublishProductScreen(),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.post_add),
+                              label: const Text('Publicar producto'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryBlue,
+                              ),
+                            ),
+                          ),
                         ),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerReportsScreen()));
-                          },
-                          icon: const Icon(Icons.bar_chart),
-                          label: const Text('Ver reportes'),
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondaryBlue),
+                        Semantics(
+                          button: true,
+                          label: 'Ver reportes',
+                          child: Tooltip(
+                            message: 'Abrir informes y métricas',
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const SellerReportsScreen(),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.bar_chart),
+                              label: const Text('Ver reportes'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.secondaryBlue,
+                              ),
+                            ),
+                          ),
                         ),
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerHistoryScreen()));
-                          },
-                          icon: const Icon(Icons.history),
-                          label: const Text('Historial'),
+                        Semantics(
+                          button: true,
+                          label: 'Historial de ventas',
+                          child: Tooltip(
+                            message: 'Ver historial de publicaciones y ventas',
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const SellerHistoryScreen(),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.history),
+                              label: const Text('Historial'),
+                            ),
+                          ),
                         ),
                       ],
                     ),

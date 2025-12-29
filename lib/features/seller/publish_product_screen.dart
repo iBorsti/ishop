@@ -9,7 +9,10 @@ class PublishProductScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Publicar producto')),
       body: Center(
-        child: Text('Formulario para publicar producto (placeholder)', style: TextStyle(color: AppColors.textDark)),
+        child: Text(
+          'Formulario para publicar producto (placeholder)',
+          style: TextStyle(color: AppColors.textDark),
+        ),
       ),
     );
   }

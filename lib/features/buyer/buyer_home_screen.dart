@@ -10,14 +10,8 @@ class BuyerHomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Inicio'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.person), onPressed: () {}),
         ],
       ),
       body: const BuyerFeed(),

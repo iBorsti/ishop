@@ -9,7 +9,10 @@ class SellerReportsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Reportes')),
       body: Center(
-        child: Text('Reportes del vendedor (placeholder)', style: TextStyle(color: AppColors.textDark)),
+        child: Text(
+          'Reportes del vendedor (placeholder)',
+          style: TextStyle(color: AppColors.textDark),
+        ),
       ),
     );
   }

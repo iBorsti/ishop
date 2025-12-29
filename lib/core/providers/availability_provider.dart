@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final availabilityProvider = StateNotifierProvider<AvailabilityNotifier, bool>((ref) {
+final availabilityProvider = StateNotifierProvider<AvailabilityNotifier, bool>((
+  ref,
+) {
   return AvailabilityNotifier(ref);
 });
 

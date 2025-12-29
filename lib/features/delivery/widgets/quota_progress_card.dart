@@ -5,7 +5,11 @@ class QuotaProgressCard extends StatelessWidget {
   final num quota;
   final num earned;
 
-  const QuotaProgressCard({super.key, required this.quota, required this.earned});
+  const QuotaProgressCard({
+    super.key,
+    required this.quota,
+    required this.earned,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +49,8 @@ class QuotaProgressCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'C\$ ${earned} / C\$ ${quota}',
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontSize: 14,
-            ),
+            'C\$ $earned / C\$ $quota',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
           ),
         ],
       ),

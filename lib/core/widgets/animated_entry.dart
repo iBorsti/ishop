@@ -6,7 +6,12 @@ class AnimatedEntry extends StatefulWidget {
   final Duration delay;
   final Duration duration;
 
-  const AnimatedEntry({super.key, required this.child, this.delay = Duration.zero, this.duration = const Duration(milliseconds: 420)});
+  const AnimatedEntry({
+    super.key,
+    required this.child,
+    this.delay = Duration.zero,
+    this.duration = const Duration(milliseconds: 420),
+  });
 
   @override
   State<AnimatedEntry> createState() => _AnimatedEntryState();

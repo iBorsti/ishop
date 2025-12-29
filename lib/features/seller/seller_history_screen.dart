@@ -9,7 +9,10 @@ class SellerHistoryScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Historial')),
       body: Center(
-        child: Text('Historial de ventas (placeholder)', style: TextStyle(color: AppColors.textDark)),
+        child: Text(
+          'Historial de ventas (placeholder)',
+          style: TextStyle(color: AppColors.textDark),
+        ),
       ),
     );
   }

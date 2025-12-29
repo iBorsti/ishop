@@ -42,7 +42,9 @@ class _AvailabilityToggleState extends ConsumerState<AvailabilityToggle> {
 
     final bgColor = loading
         ? Colors.grey.withAlpha(30)
-        : (available ? AppColors.successGreen.withAlpha(30) : Colors.grey.withAlpha(30));
+        : (available
+              ? AppColors.successGreen.withAlpha(30)
+              : Colors.grey.withAlpha(30));
 
     return FocusableActionDetector(
       focusNode: _focusNode,
@@ -51,22 +53,30 @@ class _AvailabilityToggleState extends ConsumerState<AvailabilityToggle> {
         SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
       },
       actions: <Type, Action<Intent>>{
-        ActivateIntent: CallbackAction<Intent>(onInvoke: (intent) {
-          if (!loading) {
-            ref.read(availabilityProvider.notifier).toggle();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(ref.read(availabilityProvider) ? 'Ahora disponible' : 'Ahora no disponible'),
-                duration: const Duration(seconds: 1),
-              ),
-            );
-          }
-          return null;
-        }),
+        ActivateIntent: CallbackAction<Intent>(
+          onInvoke: (intent) {
+            if (!loading) {
+              ref.read(availabilityProvider.notifier).toggle();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    ref.read(availabilityProvider)
+                        ? 'Ahora disponible'
+                        : 'Ahora no disponible',
+                  ),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            }
+            return null;
+          },
+        ),
       },
       child: Semantics(
         label: 'Estado de disponibilidad',
-        value: loading ? 'Cargando' : (available ? 'Disponible' : 'No disponible'),
+        value: loading
+            ? 'Cargando'
+            : (available ? 'Disponible' : 'No disponible'),
         toggled: available,
         enabled: !loading,
         child: AnimatedContainer(
@@ -76,7 +86,10 @@ class _AvailabilityToggleState extends ConsumerState<AvailabilityToggle> {
             color: bgColor,
             borderRadius: BorderRadius.circular(16),
             border: _focusNode.hasFocus
-                ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
+                ? Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  )
                 : null,
           ),
           child: Row(
@@ -100,24 +113,39 @@ class _AvailabilityToggleState extends ConsumerState<AvailabilityToggle> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  loading ? 'Cargando estado...' : (available ? 'Disponible para pedidos' : 'No disponible'),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textDark),
+                  loading
+                      ? 'Cargando estado...'
+                      : (available
+                            ? 'Disponible para pedidos'
+                            : 'No disponible'),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                  ),
                 ),
               ),
               Tooltip(
                 message: loading
                     ? 'Espere a que cargue el estado'
-                    : (available ? 'Desactivar disponibilidad' : 'Activar disponibilidad'),
+                    : (available
+                          ? 'Desactivar disponibilidad'
+                          : 'Activar disponibilidad'),
                 child: Switch(
                   value: available,
                   activeThumbColor: AppColors.successGreen,
                   onChanged: loading
                       ? null
                       : (value) {
-                          ref.read(availabilityProvider.notifier).setAvailable(value);
+                          ref
+                              .read(availabilityProvider.notifier)
+                              .setAvailable(value);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(value ? 'Ahora disponible' : 'Ahora no disponible'),
+                              content: Text(
+                                value
+                                    ? 'Ahora disponible'
+                                    : 'Ahora no disponible',
+                              ),
                               duration: const Duration(seconds: 1),
                             ),
                           );

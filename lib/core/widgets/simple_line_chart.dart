@@ -5,7 +5,12 @@ class SimpleLineChart extends StatelessWidget {
   final Color lineColor;
   final double height;
 
-  const SimpleLineChart({super.key, required this.data, this.lineColor = Colors.white, this.height = 120});
+  const SimpleLineChart({
+    super.key,
+    required this.data,
+    this.lineColor = Colors.white,
+    this.height = 120,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +21,11 @@ class SimpleLineChart extends StatelessWidget {
         duration: const Duration(milliseconds: 800),
         builder: (context, progress, child) {
           return CustomPaint(
-            painter: _LineChartPainter(data: data, lineColor: lineColor, progress: progress),
+            painter: _LineChartPainter(
+              data: data,
+              lineColor: lineColor,
+              progress: progress,
+            ),
             size: Size.infinite,
           );
         },
@@ -30,7 +39,11 @@ class _LineChartPainter extends CustomPainter {
   final Color lineColor;
   final double progress;
 
-  _LineChartPainter({required this.data, required this.lineColor, this.progress = 1.0});
+  _LineChartPainter({
+    required this.data,
+    required this.lineColor,
+    this.progress = 1.0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -108,7 +121,8 @@ class _LineChartPainter extends CustomPainter {
       final px = points[i];
       // check if this point is within progress
       final segIndex = i;
-      if (segIndex <= intSegments || (segIndex == intSegments + 1 && frac > 0 && i == intSegments + 1)) {
+      if (segIndex <= intSegments ||
+          (segIndex == intSegments + 1 && frac > 0 && i == intSegments + 1)) {
         canvas.drawCircle(px, 3.5, dotPaint);
         canvas.drawCircle(px, 3.5, dotBorder);
       }

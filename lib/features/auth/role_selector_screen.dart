@@ -116,7 +116,9 @@ class _RoleCardState extends State<_RoleCard> {
         scale: _pressed ? 0.98 : 1.0,
         child: Card(
           elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           clipBehavior: Clip.hardEdge,
           child: Container(
             decoration: BoxDecoration(gradient: widget.gradient),
@@ -134,7 +136,11 @@ class _RoleCardState extends State<_RoleCard> {
                 const SizedBox(height: 14),
                 Text(
                   widget.title,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
