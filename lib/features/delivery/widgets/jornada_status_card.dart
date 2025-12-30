@@ -4,9 +4,13 @@ import '../state/delivery_jornada_controller.dart';
 import '../models/delivery_jornada.dart';
 import '../services/delivery_jornada_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/alerts/alert_utils.dart';
+import '../../../core/alerts/models/alert_level.dart';
 
 class JornadaStatusCard extends StatefulWidget {
-  const JornadaStatusCard({super.key});
+  final VoidCallback? onChanged;
+
+  const JornadaStatusCard({super.key, this.onChanged});
 
   @override
   State<JornadaStatusCard> createState() => _JornadaStatusCardState();
@@ -46,6 +50,19 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
     }
   }
 
+  Color _alertColor(AlertLevel level) {
+    switch (level) {
+      case AlertLevel.critical:
+        return Colors.red;
+      case AlertLevel.warning:
+        return Colors.deepOrange;
+      case AlertLevel.info:
+        return Colors.orange;
+      case AlertLevel.none:
+        return Colors.transparent;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -62,6 +79,8 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
         final jornada = _controller.jornada;
         final debt = _controller.debt;
         final color = _statusColor(jornada.status, jornada.paid);
+        final alertLevel = resolveAlertLevel(daysOwed: debt.daysOwed);
+        final alertColor = _alertColor(alertLevel);
 
         Widget actionButton;
         String title;
@@ -72,7 +91,10 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
             title = 'Jornada no iniciada';
             subtitle = 'Pulsa para iniciar tu jornada';
             actionButton = ElevatedButton(
-              onPressed: _controller.startJornada,
+              onPressed: () {
+                _controller.startJornada();
+                widget.onChanged?.call();
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
               ),
@@ -84,7 +106,10 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
             subtitle =
                 'Cuota del día: C\$${jornada.dailyFee} • Estado: Pendiente';
             actionButton = ElevatedButton(
-              onPressed: () => _controller.closeJornada(paid: false),
+              onPressed: () {
+                _controller.closeJornada(paid: false);
+                widget.onChanged?.call();
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
               ),
@@ -99,7 +124,10 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
             } else {
               subtitle = 'Cuota pendiente: C\$${jornada.dailyFee}';
               actionButton = ElevatedButton(
-                onPressed: _controller.markAsPaid,
+                onPressed: () {
+                  _controller.markAsPaid();
+                  widget.onChanged?.call();
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,
                 ),
@@ -113,6 +141,9 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
           elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
+            side: alertLevel == AlertLevel.none
+                ? BorderSide.none
+                : BorderSide(color: alertColor.withAlpha(160), width: 1.4),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -171,6 +202,14 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                       title,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
+                    if (alertLevel != AlertLevel.none) ...[
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.report_gmailerrorred,
+                        color: alertColor,
+                        size: 18,
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 8),

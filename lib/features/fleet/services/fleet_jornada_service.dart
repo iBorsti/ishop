@@ -174,6 +174,8 @@ class FleetJornadaService {
       _debts.values.fold(0, (sum, d) => sum + d.totalAmount);
   int totalDaysOwed() => _debts.values.fold(0, (sum, d) => sum + d.daysOwed);
   int totalBikes() => _jornadas.length;
+  int bikesWithDebtCount() =>
+      _debts.values.where((d) => d.totalAmount > 0).length;
 
   int _totalClosedJornadas() {
     return _jornadas.values

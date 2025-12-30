@@ -5,6 +5,8 @@ import '../state/fleet_bike_jornada_controller.dart';
 import '../models/fleet_bike_jornada.dart';
 import '../services/fleet_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/alerts/alert_utils.dart';
+import '../../../core/alerts/models/alert_level.dart';
 
 class FleetBikeJornadaCard extends StatefulWidget {
   final Map<String, dynamic> moto;
@@ -64,6 +66,19 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
     }
   }
 
+  Color _alertColor(AlertLevel level) {
+    switch (level) {
+      case AlertLevel.critical:
+        return Colors.red;
+      case AlertLevel.warning:
+        return Colors.deepOrange;
+      case AlertLevel.info:
+        return Colors.orange;
+      case AlertLevel.none:
+        return Colors.transparent;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final alias = widget.moto['alias'] ?? '';
@@ -84,6 +99,8 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
         final jornada = _controller.jornada;
         final debt = _controller.debt;
         final color = _statusColor(jornada.status, jornada.paid);
+        final alertLevel = resolveAlertLevel(daysOwed: debt.daysOwed);
+        final alertColor = _alertColor(alertLevel);
 
         Widget actionButton;
         String title;
@@ -169,6 +186,18 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                       ),
                     ),
                     Text(driver, style: const TextStyle(color: Colors.black54)),
+                    if (alertLevel != AlertLevel.none) ...[
+                      const SizedBox(width: 8),
+                      Tooltip(
+                        message:
+                            'Esta moto lleva ${debt.daysOwed} día(s) sin pagar',
+                        child: Icon(
+                          Icons.report_gmailerrorred,
+                          color: alertColor,
+                          size: 18,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 8),

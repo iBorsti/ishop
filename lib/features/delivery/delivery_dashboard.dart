@@ -10,6 +10,9 @@ import 'widgets/delivery_stat_section.dart';
 import 'widgets/jornada_status_card.dart';
 import '../../core/services/mock_api.dart';
 import 'delivery_payment_history_screen.dart';
+import '../../core/alerts/alert_utils.dart';
+import '../../core/alerts/widgets/alert_banner.dart';
+import 'services/delivery_jornada_service.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
   const DeliveryDashboard({super.key});
@@ -19,9 +22,12 @@ class DeliveryDashboard extends ConsumerStatefulWidget {
 }
 
 class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
+  final DeliveryJornadaService _jornadaService = DeliveryJornadaService();
   bool loading = true;
   String? error;
   Map<String, dynamic>? stats;
+  bool _alertLoading = true;
+  int _daysOwed = 0;
 
   @override
   void initState() {
@@ -36,11 +42,13 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
     });
     try {
       final result = await fetchDeliveryStats();
+      await _loadAlerts();
       setState(() {
         stats = result;
         loading = false;
       });
     } catch (e) {
+      await _loadAlerts();
       setState(() {
         error = e.toString();
         loading = false;
@@ -48,13 +56,45 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
     }
   }
 
+  Future<void> _loadAlerts() async {
+    await _jornadaService.load();
+    if (!mounted) return;
+    setState(() {
+      _daysOwed = _jornadaService.getDebt().daysOwed;
+      _alertLoading = false;
+    });
+  }
+
+  Future<void> _refreshAlerts() async {
+    setState(() {
+      _alertLoading = true;
+    });
+    await _loadAlerts();
+  }
+
+  String _alertMessage(int days) {
+    if (days <= 0) return '';
+    if (days == 1) return 'Tienes 1 jornada pendiente';
+    if (days >= 5) return 'Tienes $days jornadas pendientes. Revisa tus pagos.';
+    return 'Tienes $days jornadas pendientes';
+  }
+
   @override
   Widget build(BuildContext context) {
     final available = ref.watch(availabilityProvider);
+    final level = resolveAlertLevel(daysOwed: _daysOwed);
     return DashboardScaffold(
       title: 'Delivery',
       children: [
-        const JornadaStatusCard(),
+        if (!_alertLoading)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AlertBanner(
+              level: level,
+              message: _alertMessage(_daysOwed),
+            ),
+          ),
+        JornadaStatusCard(onChanged: _refreshAlerts),
         const SizedBox(height: 8),
         Align(
           alignment: Alignment.centerLeft,

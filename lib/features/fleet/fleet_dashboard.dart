@@ -9,6 +9,9 @@ import 'widgets/fleet_financial_summary_card.dart';
 import '../../core/widgets/dashboard_scaffold.dart';
 import '../../core/widgets/dashboard_section_title.dart';
 import 'fleet_payment_history_screen.dart';
+import '../../core/alerts/alert_utils.dart';
+import '../../core/alerts/widgets/alert_banner.dart';
+import '../../core/alerts/models/alert_level.dart';
 
 class FleetDashboard extends StatefulWidget {
   const FleetDashboard({super.key});
@@ -101,6 +104,21 @@ class _FleetDashboardState extends State<FleetDashboard> {
     return DashboardScaffold(
       title: 'Flota',
       children: [
+        Builder(builder: (context) {
+          final daysOwed = _service.totalDaysOwed();
+          final level = resolveAlertLevel(daysOwed: daysOwed);
+          final bikesInDebt = _service.bikesWithDebtCount();
+          final debt = _service.totalDebtAmount();
+          if (level == AlertLevel.none || bikesInDebt == 0) {
+            return const SizedBox.shrink();
+          }
+          final message =
+              '$bikesInDebt motos con deuda • Deuda: C\$$debt';
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: AlertBanner(level: level, message: message),
+          );
+        }),
         Align(
           alignment: Alignment.centerLeft,
           child: ElevatedButton.icon(
