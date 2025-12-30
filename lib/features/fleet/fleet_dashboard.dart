@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'services/fleet_jornada_service.dart';
 import 'services/fleet_service.dart';
 import 'widgets/fleet_stat_section.dart';
-import 'widgets/quota_overview_card.dart';
 import 'widgets/fleet_map_placeholder.dart';
 import 'widgets/moto_status_card.dart';
 import 'widgets/fleet_bike_jornada_card.dart';
+import 'widgets/fleet_financial_summary_card.dart';
 import '../../core/widgets/dashboard_scaffold.dart';
 import '../../core/widgets/dashboard_section_title.dart';
 
@@ -100,13 +100,13 @@ class _FleetDashboardState extends State<FleetDashboard> {
     return DashboardScaffold(
       title: 'Flota',
       children: [
-        const DashboardSectionTitle('Resumen'),
-        FleetStatSection(stats: stats),
+        const DashboardSectionTitle('Finanzas de hoy'),
+        FleetFinancialSummaryCard(summary: _service.getFinancialSummary()),
         const SizedBox(height: 12),
         _jornadaSummaryCard(),
         const SizedBox(height: 16),
-        const DashboardSectionTitle('Cuotas'),
-        QuotaOverviewCard(stats: stats),
+        const DashboardSectionTitle('Resumen rápido'),
+        FleetStatSection(stats: stats),
         const SizedBox(height: 16),
         const DashboardSectionTitle('Jornadas por moto'),
         FleetBikeJornadaList(
