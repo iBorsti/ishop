@@ -50,9 +50,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
   }
 
   void _showMessage(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
   Color _statusColor(FleetJornadaStatus status, bool paid) {
@@ -94,7 +92,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
         switch (jornada.status) {
           case FleetJornadaStatus.notStarted:
             title = 'Jornada no iniciada';
-            subtitle = 'Cuota diaria: C$${jornada.dailyFee}';
+            subtitle = 'Cuota diaria: C\$${jornada.dailyFee}';
             actionButton = ElevatedButton(
               onPressed: () {
                 _controller.startJornada();
@@ -109,7 +107,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
             break;
           case FleetJornadaStatus.active:
             title = 'Jornada en curso';
-            subtitle = 'Cuota del día: C$${jornada.dailyFee}';
+            subtitle = 'Cuota del día: C\$${jornada.dailyFee}';
             actionButton = ElevatedButton(
               onPressed: () {
                 _controller.closeJornada(paid: false);
@@ -128,7 +126,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
               subtitle = 'Cuota pagada';
               actionButton = const SizedBox.shrink();
             } else {
-              subtitle = 'Cuota pendiente: C$${jornada.dailyFee}';
+              subtitle = 'Cuota pendiente: C\$${jornada.dailyFee}';
               actionButton = ElevatedButton(
                 onPressed: () {
                   _controller.markAsPaid();
@@ -170,19 +168,13 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    Text(
-                      driver,
-                      style: const TextStyle(color: Colors.black54),
-                    ),
+                    Text(driver, style: const TextStyle(color: Colors.black54)),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(title),
                 const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(color: Colors.black54),
-                ),
+                Text(subtitle, style: const TextStyle(color: Colors.black54)),
                 const SizedBox(height: 12),
                 if (debt.totalAmount > 0) ...[
                   Container(
@@ -215,7 +207,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                         ),
                         const SizedBox(height: 4),
                         Text('Días adeudados: ${debt.daysOwed}'),
-                        Text('Total: C$${debt.totalAmount}'),
+                        Text('Total: C\$${debt.totalAmount}'),
                       ],
                     ),
                   ),
@@ -237,14 +229,14 @@ class FleetBikeJornadaList extends StatefulWidget {
   final bool autoLoad;
   final VoidCallback? onChanged;
 
-  const FleetBikeJornadaList({
+  FleetBikeJornadaList({
     super.key,
     FleetJornadaService? service,
     List<Map<String, dynamic>>? motos,
     this.autoLoad = true,
     this.onChanged,
-  })  : service = service ?? FleetJornadaService(),
-        motos = motos ?? FleetService.getMotos();
+  }) : service = service ?? FleetJornadaService(),
+       motos = motos ?? FleetService.getMotos();
 
   @override
   State<FleetBikeJornadaList> createState() => _FleetBikeJornadaListState();
@@ -323,7 +315,7 @@ class _FleetBikeJornadaListState extends State<FleetBikeJornadaList> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text('Días adeudados: $daysOwed'),
-                    Text('Deuda total: C$$totalDebt'),
+                    Text('Deuda total: C\$${totalDebt}'),
                   ],
                 ),
               ],
