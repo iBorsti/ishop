@@ -51,27 +51,45 @@ class AlertBanner extends StatelessWidget {
     }
   }
 
+  String _levelText(AlertLevel level) {
+    switch (level) {
+      case AlertLevel.critical:
+        return 'Alerta crítica';
+      case AlertLevel.warning:
+        return 'Atención';
+      case AlertLevel.info:
+        return 'Aviso';
+      case AlertLevel.none:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (level == AlertLevel.none) return const SizedBox.shrink();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: _background(level),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _iconColor(level).withAlpha(120)),
-      ),
-      child: Row(
-        children: [
-          Icon(_icon(level), color: _iconColor(level)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+    final semanticsLabel = '${_levelText(level)}: $message';
+    return Semantics(
+      container: true,
+      label: semanticsLabel,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: _background(level),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: _iconColor(level).withAlpha(120)),
+        ),
+        child: Row(
+          children: [
+            Icon(_icon(level), color: _iconColor(level)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

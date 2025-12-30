@@ -6,6 +6,8 @@ import 'package:uuid/uuid.dart';
 import '../models/delivery_jornada.dart';
 import '../models/delivery_debt.dart';
 import '../models/delivery_payment.dart';
+import '../models/delivery_weekly_summary.dart';
+import '../../../core/utils/week_utils.dart';
 
 class DeliveryJornadaService {
   DeliveryJornada _jornada = DeliveryJornada.todayNotStarted();
@@ -156,4 +158,41 @@ class DeliveryJornadaService {
 
   List<DeliveryPayment> getPaymentHistory() =>
       List.unmodifiable(_payments.reversed);
+
+  DeliveryWeeklySummary getWeeklySummary(DateTime date) {
+    final start = startOfWeek(date);
+    final end = endOfWeek(date);
+
+    int worked = 0;
+    int paid = 0;
+    int pending = 0;
+    double pendingAmount = 0;
+
+    Iterable<DeliveryJornada> candidates = _history;
+
+    // Include current jornada if it falls within the week
+    if (_jornada.date.isAfter(start.subtract(const Duration(days: 1))) &&
+        _jornada.date.isBefore(end.add(const Duration(days: 1)))) {
+      candidates = [..._history, _jornada];
+    }
+
+    for (final j in candidates) {
+      final reference = j.closedAt ?? j.date;
+      if (reference.isBefore(start) || reference.isAfter(end)) continue;
+      worked += 1;
+      if (j.paid) {
+        paid += 1;
+      } else {
+        pending += 1;
+        pendingAmount += j.dailyFee.toDouble();
+      }
+    }
+
+    return DeliveryWeeklySummary(
+      worked: worked,
+      paid: paid,
+      pending: pending,
+      pendingAmount: pendingAmount,
+    );
+  }
 }

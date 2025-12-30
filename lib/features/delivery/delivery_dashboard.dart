@@ -13,6 +13,10 @@ import 'delivery_payment_history_screen.dart';
 import '../../core/alerts/alert_utils.dart';
 import '../../core/alerts/widgets/alert_banner.dart';
 import 'services/delivery_jornada_service.dart';
+import '../../core/alerts/models/alert_level.dart';
+import '../../core/widgets/weekly_summary_card.dart';
+import 'models/delivery_weekly_summary.dart';
+import '../../core/utils/week_utils.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
   const DeliveryDashboard({super.key});
@@ -28,6 +32,9 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
   Map<String, dynamic>? stats;
   bool _alertLoading = true;
   int _daysOwed = 0;
+  DeliveryWeeklySummary? _weeklySummary;
+  DeliveryWeeklySummary? _prevWeeklySummary;
+  String? _weekLabel;
 
   @override
   void initState() {
@@ -43,12 +50,14 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
     try {
       final result = await fetchDeliveryStats();
       await _loadAlerts();
+      await _loadWeeklySummary();
       setState(() {
         stats = result;
         loading = false;
       });
     } catch (e) {
       await _loadAlerts();
+      await _loadWeeklySummary();
       setState(() {
         error = e.toString();
         loading = false;
@@ -65,33 +74,80 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
     });
   }
 
+  Future<void> _loadWeeklySummary() async {
+    await _jornadaService.load();
+    if (!mounted) return;
+    setState(() {
+      _weeklySummary = _jornadaService.getWeeklySummary(DateTime.now());
+      _prevWeeklySummary = _jornadaService.getWeeklySummary(
+        DateTime.now().subtract(const Duration(days: 7)),
+      );
+      _weekLabel = weekRangeLabel(DateTime.now());
+    });
+  }
+
   Future<void> _refreshAlerts() async {
     setState(() {
       _alertLoading = true;
     });
     await _loadAlerts();
+    await _loadWeeklySummary();
   }
 
-  String _alertMessage(int days) {
+  String _alertMessage(int days, AlertLevel level) {
     if (days <= 0) return '';
-    if (days == 1) return 'Tienes 1 jornada pendiente';
-    if (days >= 5) return 'Tienes $days jornadas pendientes. Revisa tus pagos.';
-    return 'Tienes $days jornadas pendientes';
+    switch (level) {
+      case AlertLevel.info:
+        return days == 1
+            ? 'Tienes 1 jornada pendiente'
+            : 'Tienes $days jornadas pendientes';
+      case AlertLevel.warning:
+        return 'Tu deuda está aumentando ($days jornadas pendientes)';
+      case AlertLevel.critical:
+        return 'Revisa tus pagos para evitar acumulación ($days jornadas pendientes)';
+      case AlertLevel.none:
+        return '';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final available = ref.watch(availabilityProvider);
     final level = resolveAlertLevel(daysOwed: _daysOwed);
+    final message = _alertMessage(_daysOwed, level);
+    final summary = _weeklySummary;
+    final prev = _prevWeeklySummary;
     return DashboardScaffold(
       title: 'Delivery',
       children: [
         if (!_alertLoading)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: AlertBanner(
-              level: level,
-              message: _alertMessage(_daysOwed),
+            child: Tooltip(
+              message: message,
+              child: AlertBanner(
+                level: level,
+                message: message,
+              ),
+            ),
+          ),
+        if (summary != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: WeeklySummaryCard(
+              title: 'Resumen semanal',
+              lines: [
+                'Trabajaste ${summary.worked} día(s).',
+                'Pagaste ${summary.paid}.',
+                'Tienes ${summary.pending} pendiente(s).',
+              ],
+              subtitle: _weekLabel,
+              highlightAmount: summary.pendingAmount > 0
+                  ? 'Deuda semanal: C\$${summary.pendingAmount.toStringAsFixed(2)}'
+                  : null,
+              comparison: prev != null
+                  ? 'Semana anterior: trabajaste ${prev.worked}, pendientes ${prev.pending} (C\$${prev.pendingAmount.toStringAsFixed(2)})'
+                  : null,
             ),
           ),
         JornadaStatusCard(onChanged: _refreshAlerts),

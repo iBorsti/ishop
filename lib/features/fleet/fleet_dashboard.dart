@@ -12,6 +12,9 @@ import 'fleet_payment_history_screen.dart';
 import '../../core/alerts/alert_utils.dart';
 import '../../core/alerts/widgets/alert_banner.dart';
 import '../../core/alerts/models/alert_level.dart';
+import '../../core/widgets/weekly_summary_card.dart';
+import 'models/fleet_weekly_summary.dart';
+import '../../core/utils/week_utils.dart';
 
 class FleetDashboard extends StatefulWidget {
   const FleetDashboard({super.key});
@@ -24,6 +27,9 @@ class _FleetDashboardState extends State<FleetDashboard> {
   final FleetJornadaService _service = FleetJornadaService();
   late final List<Map<String, dynamic>> _motos;
   bool _loading = true;
+  FleetWeeklySummary? _weeklySummary;
+  FleetWeeklySummary? _prevWeeklySummary;
+  String? _weekLabel;
 
   @override
   void initState() {
@@ -39,6 +45,10 @@ class _FleetDashboardState extends State<FleetDashboard> {
       _service.getJornada(id);
       _service.getDebt(id);
     }
+    _weeklySummary = _service.getWeeklySummary(DateTime.now());
+    _prevWeeklySummary =
+        _service.getWeeklySummary(DateTime.now().subtract(const Duration(days: 7)));
+    _weekLabel = weekRangeLabel(DateTime.now());
     if (mounted) {
       setState(() {
         _loading = false;
@@ -112,13 +122,47 @@ class _FleetDashboardState extends State<FleetDashboard> {
           if (level == AlertLevel.none || bikesInDebt == 0) {
             return const SizedBox.shrink();
           }
-          final message =
-              '$bikesInDebt motos con deuda • Deuda: C\$$debt';
+          String message;
+          switch (level) {
+            case AlertLevel.info:
+              message = '$bikesInDebt motos con deuda • Deuda: C\$$debt';
+              break;
+            case AlertLevel.warning:
+              message =
+                  'Tu deuda de flota está aumentando: $bikesInDebt motos • C\$$debt';
+              break;
+            case AlertLevel.critical:
+              message =
+                  'Revisa pagos: $bikesInDebt motos con deuda • Deuda: C\$$debt';
+              break;
+            case AlertLevel.none:
+              message = '';
+              break;
+          }
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: AlertBanner(level: level, message: message),
           );
         }),
+        if (_weeklySummary != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: WeeklySummaryCard(
+              title: 'Resumen semanal',
+              lines: [
+                'Motos activas: ${_weeklySummary!.activeBikes}',
+                'Jornadas de moto: ${_weeklySummary!.bikeJornadas}',
+                'Días con deuda: ${_weeklySummary!.debtDays}',
+              ],
+              subtitle: _weekLabel,
+              highlightAmount: _weeklySummary!.debtAmount > 0
+                  ? 'Deuda semanal: C\$${_weeklySummary!.debtAmount.toStringAsFixed(2)}'
+                  : null,
+              comparison: _prevWeeklySummary != null
+                  ? 'Semana anterior: jornadas ${_prevWeeklySummary!.bikeJornadas}, deuda C\$${_prevWeeklySummary!.debtAmount.toStringAsFixed(2)}'
+                  : null,
+            ),
+          ),
         Align(
           alignment: Alignment.centerLeft,
           child: ElevatedButton.icon(

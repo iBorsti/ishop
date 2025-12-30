@@ -7,6 +7,8 @@ import '../models/fleet_bike_jornada.dart';
 import '../models/fleet_bike_debt.dart';
 import '../models/fleet_financial_summary.dart';
 import '../models/fleet_payment.dart';
+import '../models/fleet_weekly_summary.dart';
+import '../../../core/utils/week_utils.dart';
 
 class FleetJornadaService {
   final Map<String, FleetBikeJornada> _jornadas = {};
@@ -176,6 +178,48 @@ class FleetJornadaService {
   int totalBikes() => _jornadas.length;
   int bikesWithDebtCount() =>
       _debts.values.where((d) => d.totalAmount > 0).length;
+
+  FleetWeeklySummary getWeeklySummary(DateTime date) {
+    final start = startOfWeek(date);
+    final end = endOfWeek(date);
+
+    int bikeJornadas = 0;
+    int debtDays = 0;
+    double debtAmount = 0;
+
+    // Count jornada history within week
+    for (final entry in _history.entries) {
+      for (final j in entry.value) {
+        final reference = j.closedAt ?? j.date;
+        if (reference.isBefore(start) || reference.isAfter(end)) continue;
+        bikeJornadas += 1;
+        if (!j.paid) {
+          debtDays += 1;
+          debtAmount += j.dailyFee.toDouble();
+        }
+      }
+    }
+
+    // Include current jornadas if in week
+    for (final j in _jornadas.values) {
+      final reference = j.closedAt ?? j.date;
+      if (reference.isBefore(start) || reference.isAfter(end)) continue;
+      bikeJornadas += 1;
+      if (!j.paid) {
+        debtDays += 1;
+        debtAmount += j.dailyFee.toDouble();
+      }
+    }
+
+    final activeBikes = _jornadas.length;
+
+    return FleetWeeklySummary(
+      activeBikes: activeBikes,
+      bikeJornadas: bikeJornadas,
+      debtDays: debtDays,
+      debtAmount: debtAmount,
+    );
+  }
 
   int _totalClosedJornadas() {
     return _jornadas.values
