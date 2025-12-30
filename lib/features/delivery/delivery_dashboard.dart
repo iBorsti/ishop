@@ -12,11 +12,12 @@ import '../../core/services/mock_api.dart';
 import 'delivery_payment_history_screen.dart';
 import '../../core/alerts/alert_utils.dart';
 import '../../core/alerts/widgets/alert_banner.dart';
-import 'services/delivery_jornada_service.dart';
 import '../../core/alerts/models/alert_level.dart';
 import '../../core/widgets/weekly_summary_card.dart';
 import 'models/delivery_weekly_summary.dart';
 import '../../core/utils/week_utils.dart';
+import 'services/delivery_jornada_repository.dart';
+import 'services/delivery_jornada_factory.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
   const DeliveryDashboard({super.key});
@@ -26,7 +27,8 @@ class DeliveryDashboard extends ConsumerStatefulWidget {
 }
 
 class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
-  final DeliveryJornadaService _jornadaService = DeliveryJornadaService();
+  final DeliveryJornadaRepository _jornadaService =
+      buildDeliveryJornadaRepository();
   bool loading = true;
   String? error;
   Map<String, dynamic>? stats;

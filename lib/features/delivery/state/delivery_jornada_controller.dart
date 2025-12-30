@@ -2,15 +2,17 @@ import 'package:flutter/foundation.dart';
 
 import '../models/delivery_jornada.dart';
 import '../models/delivery_debt.dart';
-import '../services/delivery_jornada_service.dart';
+import '../services/delivery_jornada_repository.dart';
+import '../services/delivery_jornada_factory.dart';
 
 class DeliveryJornadaController extends ChangeNotifier {
-  final DeliveryJornadaService _service;
+  final DeliveryJornadaRepository _service;
 
   bool _loading = true;
   bool get loading => _loading;
 
-  DeliveryJornadaController(this._service);
+  DeliveryJornadaController([DeliveryJornadaRepository? service])
+      : _service = service ?? buildDeliveryJornadaRepository();
 
   DeliveryJornada get jornada => _service.getCurrentJornada();
   DeliveryDebt get debt => _service.getDebt();

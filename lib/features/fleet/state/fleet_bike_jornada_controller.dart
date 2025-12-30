@@ -2,16 +2,20 @@ import 'package:flutter/foundation.dart';
 
 import '../models/fleet_bike_debt.dart';
 import '../models/fleet_bike_jornada.dart';
-import '../services/fleet_jornada_service.dart';
+import '../services/fleet_jornada_repository.dart';
+import '../services/fleet_jornada_factory.dart';
 
 class FleetBikeJornadaController extends ChangeNotifier {
-  final FleetJornadaService _service;
+  final FleetJornadaRepository _service;
   final String bikeId;
 
   bool _loading = true;
   bool get loading => _loading;
 
-  FleetBikeJornadaController(this._service, {required this.bikeId});
+  FleetBikeJornadaController(
+    FleetJornadaRepository? service, {
+    required this.bikeId,
+  }) : _service = service ?? buildFleetJornadaRepository();
 
   FleetBikeJornada get jornada => _service.getJornada(bikeId);
   FleetBikeDebt get debt => _service.getDebt(bikeId);

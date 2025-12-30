@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../services/fleet_jornada_service.dart';
+import '../services/fleet_jornada_repository.dart';
 import '../state/fleet_bike_jornada_controller.dart';
 import '../models/fleet_bike_jornada.dart';
 import '../services/fleet_service.dart';
+import '../services/fleet_jornada_factory.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/alerts/alert_utils.dart';
 import '../../../core/alerts/models/alert_level.dart';
+import '../../../core/widgets/confirm_dialog.dart';
 
 class FleetBikeJornadaCard extends StatefulWidget {
   final Map<String, dynamic> moto;
-  final FleetJornadaService service;
+  final FleetJornadaRepository service;
   final VoidCallback onChanged;
 
   const FleetBikeJornadaCard({
@@ -27,6 +29,7 @@ class FleetBikeJornadaCard extends StatefulWidget {
 class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
   late final FleetBikeJornadaController _controller;
   bool _initialized = false;
+  bool _actionLoading = false;
 
   @override
   void initState() {
@@ -126,15 +129,36 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
             title = 'Jornada en curso';
             subtitle = 'Cuota del día: C\$${jornada.dailyFee}';
             actionButton = ElevatedButton(
-              onPressed: () {
-                _controller.closeJornada(paid: false);
-                _showMessage('Jornada cerrada para ${widget.moto['id']}');
-                widget.onChanged();
-              },
+              onPressed: _actionLoading
+                  ? null
+                  : () async {
+                      final confirmed = await showConfirmDialog(
+                        context: context,
+                        title: 'Cerrar jornada',
+                        message:
+                            '¿Seguro que deseas cerrar la jornada? Esta acción no se puede deshacer.',
+                      );
+                      if (confirmed != true) return;
+                      if (_actionLoading) return;
+                      setState(() => _actionLoading = true);
+                      try {
+                        _controller.closeJornada(paid: false);
+                        _showMessage('Jornada cerrada para ${widget.moto['id']}');
+                        widget.onChanged();
+                      } finally {
+                        if (mounted) setState(() => _actionLoading = false);
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryBlue,
               ),
-              child: const Text('Cerrar jornada'),
+              child: _actionLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Cerrar jornada'),
             );
             break;
           case FleetJornadaStatus.closed:
@@ -145,15 +169,36 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
             } else {
               subtitle = 'Cuota pendiente: C\$${jornada.dailyFee}';
               actionButton = ElevatedButton(
-                onPressed: () {
-                  _controller.markAsPaid();
-                  _showMessage('Cuota pagada para ${widget.moto['id']}');
-                  widget.onChanged();
-                },
+                onPressed: _actionLoading
+                    ? null
+                    : () async {
+                        final confirmed = await showConfirmDialog(
+                          context: context,
+                          title: 'Registrar pago',
+                          message:
+                              'Este registro limpiará la deuda actual. ¿Deseas continuar?',
+                        );
+                        if (confirmed != true) return;
+                        if (_actionLoading) return;
+                        setState(() => _actionLoading = true);
+                        try {
+                          _controller.markAsPaid();
+                          _showMessage('Cuota pagada para ${widget.moto['id']}');
+                          widget.onChanged();
+                        } finally {
+                          if (mounted) setState(() => _actionLoading = false);
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,
                 ),
-                child: const Text('Marcar como pagada'),
+                child: _actionLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Marcar como pagada'),
               );
             }
             break;
@@ -253,18 +298,18 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
 }
 
 class FleetBikeJornadaList extends StatefulWidget {
-  final FleetJornadaService service;
+  final FleetJornadaRepository service;
   final List<Map<String, dynamic>> motos;
   final bool autoLoad;
   final VoidCallback? onChanged;
 
   FleetBikeJornadaList({
     super.key,
-    FleetJornadaService? service,
+    FleetJornadaRepository? service,
     List<Map<String, dynamic>>? motos,
     this.autoLoad = true,
     this.onChanged,
-  }) : service = service ?? FleetJornadaService(),
+  }) : service = service ?? buildFleetJornadaRepository(),
        motos = motos ?? FleetService.getMotos();
 
   @override

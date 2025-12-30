@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'models/delivery_payment.dart';
-import 'services/delivery_jornada_service.dart';
+import 'services/delivery_jornada_repository.dart';
+import 'services/delivery_jornada_factory.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 class DeliveryPaymentHistoryScreen extends StatefulWidget {
   const DeliveryPaymentHistoryScreen({super.key});
@@ -14,7 +16,7 @@ class DeliveryPaymentHistoryScreen extends StatefulWidget {
 
 class _DeliveryPaymentHistoryScreenState
     extends State<DeliveryPaymentHistoryScreen> {
-  final DeliveryJornadaService _service = DeliveryJornadaService();
+  final DeliveryJornadaRepository _service = buildDeliveryJornadaRepository();
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
   bool _loading = true;
 
@@ -39,6 +41,7 @@ class _DeliveryPaymentHistoryScreenState
     final amountCtrl = TextEditingController();
     final jornadasCtrl = TextEditingController(text: '1');
     String? error;
+    bool saving = false;
 
     final result = await showDialog<bool>(
       context: context,
@@ -85,27 +88,49 @@ class _DeliveryPaymentHistoryScreenState
                   child: const Text('Cancelar'),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    final amount = double.tryParse(amountCtrl.text.trim());
-                    final jornadas = int.tryParse(jornadasCtrl.text.trim());
+                  onPressed: saving
+                      ? null
+                      : () async {
+                          final amount =
+                              double.tryParse(amountCtrl.text.trim());
+                          final jornadas =
+                              int.tryParse(jornadasCtrl.text.trim());
 
-                    if (amount == null || amount <= 0 || jornadas == null ||
-                        jornadas <= 0) {
-                      setInnerState(() {
-                        error = 'Ingresa monto y jornadas válidos';
-                      });
-                      return;
-                    }
+                          if (amount == null || amount <= 0 ||
+                              jornadas == null || jornadas <= 0) {
+                            setInnerState(() {
+                              error = 'Ingresa monto y jornadas válidos';
+                            });
+                            return;
+                          }
 
-                    _service.recordPayment(
-                      amount: amount,
-                      jornadasCovered: jornadas,
-                      recordedBy: 'delivery',
-                    );
-                    Navigator.of(ctx).pop(true);
-                  },
-                  icon: const Icon(Icons.check_circle_outline),
-                  label: const Text('Guardar'),
+                          final confirmed = await showConfirmDialog(
+                            context: context,
+                            title: 'Registrar pago',
+                            message:
+                                'Este registro limpiará la deuda actual. ¿Deseas continuar?',
+                          );
+                          if (confirmed != true) return;
+                          if (saving) return;
+                          setInnerState(() {
+                            saving = true;
+                          });
+
+                          _service.recordPayment(
+                            amount: amount,
+                            jornadasCovered: jornadas,
+                            recordedBy: 'delivery',
+                          );
+                          Navigator.of(ctx).pop(true);
+                        },
+                  icon: saving
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check_circle_outline),
+                  label: saving ? const Text('Guardando...') : const Text('Guardar'),
                 ),
               ],
             );

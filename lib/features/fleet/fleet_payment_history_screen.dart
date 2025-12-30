@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'models/fleet_payment.dart';
-import 'services/fleet_jornada_service.dart';
+import 'services/fleet_jornada_repository.dart';
+import 'services/fleet_jornada_factory.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 class FleetPaymentHistoryScreen extends StatefulWidget {
   const FleetPaymentHistoryScreen({super.key});
@@ -13,7 +15,7 @@ class FleetPaymentHistoryScreen extends StatefulWidget {
 }
 
 class _FleetPaymentHistoryScreenState extends State<FleetPaymentHistoryScreen> {
-  final FleetJornadaService _service = FleetJornadaService();
+  final FleetJornadaRepository _service = buildFleetJornadaRepository();
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
   bool _loading = true;
 
@@ -38,6 +40,7 @@ class _FleetPaymentHistoryScreenState extends State<FleetPaymentHistoryScreen> {
     final amountCtrl = TextEditingController();
     final bikesCtrl = TextEditingController(text: '1');
     String? error;
+    bool saving = false;
 
     final result = await showDialog<bool>(
       context: context,
@@ -84,27 +87,48 @@ class _FleetPaymentHistoryScreenState extends State<FleetPaymentHistoryScreen> {
                   child: const Text('Cancelar'),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    final amount = double.tryParse(amountCtrl.text.trim());
-                    final bikes = int.tryParse(bikesCtrl.text.trim());
+                  onPressed: saving
+                      ? null
+                      : () async {
+                          final amount =
+                              double.tryParse(amountCtrl.text.trim());
+                          final bikes = int.tryParse(bikesCtrl.text.trim());
 
-                    if (amount == null || amount <= 0 || bikes == null ||
-                        bikes <= 0) {
-                      setInnerState(() {
-                        error = 'Ingresa monto y motos válidos';
-                      });
-                      return;
-                    }
+                          if (amount == null || amount <= 0 || bikes == null ||
+                              bikes <= 0) {
+                            setInnerState(() {
+                              error = 'Ingresa monto y motos válidos';
+                            });
+                            return;
+                          }
 
-                    _service.recordPayment(
-                      amount: amount,
-                      bikesCovered: bikes,
-                      recordedBy: 'admin',
-                    );
-                    Navigator.of(ctx).pop(true);
-                  },
-                  icon: const Icon(Icons.check_circle_outline),
-                  label: const Text('Guardar'),
+                          final confirmed = await showConfirmDialog(
+                            context: context,
+                            title: 'Registrar pago',
+                            message:
+                                'Este registro limpiará la deuda actual. ¿Deseas continuar?',
+                          );
+                          if (confirmed != true) return;
+                          if (saving) return;
+                          setInnerState(() {
+                            saving = true;
+                          });
+
+                          _service.recordPayment(
+                            amount: amount,
+                            bikesCovered: bikes,
+                            recordedBy: 'admin',
+                          );
+                          Navigator.of(ctx).pop(true);
+                        },
+                  icon: saving
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check_circle_outline),
+                  label: saving ? const Text('Guardando...') : const Text('Guardar'),
                 ),
               ],
             );

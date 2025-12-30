@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'services/fleet_jornada_service.dart';
+import 'services/fleet_jornada_repository.dart';
+import 'services/fleet_jornada_factory.dart';
 import 'services/fleet_service.dart';
 import 'widgets/fleet_stat_section.dart';
 import 'widgets/fleet_map_placeholder.dart';
@@ -24,7 +25,7 @@ class FleetDashboard extends StatefulWidget {
 }
 
 class _FleetDashboardState extends State<FleetDashboard> {
-  final FleetJornadaService _service = FleetJornadaService();
+  final FleetJornadaRepository _service = buildFleetJornadaRepository();
   late final List<Map<String, dynamic>> _motos;
   bool _loading = true;
   FleetWeeklySummary? _weeklySummary;

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../state/delivery_jornada_controller.dart';
 import '../models/delivery_jornada.dart';
-import '../services/delivery_jornada_service.dart';
+import '../services/delivery_jornada_repository.dart';
+import '../services/delivery_jornada_factory.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/alerts/alert_utils.dart';
 import '../../../core/alerts/models/alert_level.dart';
+import '../../../core/widgets/confirm_dialog.dart';
 
 class JornadaStatusCard extends StatefulWidget {
   final VoidCallback? onChanged;
@@ -19,11 +21,12 @@ class JornadaStatusCard extends StatefulWidget {
 class _JornadaStatusCardState extends State<JornadaStatusCard> {
   late final DeliveryJornadaController _controller;
   bool _initialized = false;
+  bool _actionLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = DeliveryJornadaController(DeliveryJornadaService());
+    _controller = DeliveryJornadaController(buildDeliveryJornadaRepository());
     _initOnce();
   }
 
@@ -106,7 +109,14 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
             subtitle =
                 'Cuota del día: C\$${jornada.dailyFee} • Estado: Pendiente';
             actionButton = ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                final confirmed = await showConfirmDialog(
+                  context: context,
+                  title: 'Cerrar jornada',
+                  message:
+                      '¿Seguro que deseas cerrar la jornada? Esta acción no se puede deshacer.',
+                );
+                if (confirmed != true) return;
                 _controller.closeJornada(paid: false);
                 widget.onChanged?.call();
               },
@@ -121,29 +131,74 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
             if (jornada.paid) {
               subtitle = 'Cuota pagada';
               actionButton = const SizedBox.shrink();
-            } else {
+              onPressed: _actionLoading
+                  ? null
+                  : () async {
+                      final confirmed = await showConfirmDialog(
+                        context: context,
+                        title: 'Cerrar jornada',
+                        message:
+                            '¿Seguro que deseas cerrar la jornada? Esta acción no se puede deshacer.',
+                      );
+                      if (confirmed != true) return;
+                      if (_actionLoading) return;
+                      setState(() => _actionLoading = true);
+                      try {
+                        _controller.closeJornada(paid: false);
+                        widget.onChanged?.call();
+                      } finally {
+                        if (mounted) setState(() => _actionLoading = false);
+                      }
+                    },
               subtitle = 'Cuota pendiente: C\$${jornada.dailyFee}';
               actionButton = ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+              child: _actionLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Cerrar jornada'),
+                    context: context,
+                    title: 'Registrar pago',
+                    message:
+                        'Este registro limpiará la deuda actual. ¿Deseas continuar?',
+                  );
+                  if (confirmed != true) return;
                   _controller.markAsPaid();
                   widget.onChanged?.call();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                ),
-                child: const Text('Marcar como pagada'),
-              );
-            }
-            break;
-        }
-
-        return Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
+                onPressed: _actionLoading
+                    ? null
+                    : () async {
+                        final confirmed = await showConfirmDialog(
+                          context: context,
+                          title: 'Registrar pago',
+                          message:
+                              'Este registro limpiará la deuda actual. ¿Deseas continuar?',
+                        );
+                        if (confirmed != true) return;
+                        if (_actionLoading) return;
+                        setState(() => _actionLoading = true);
+                        try {
+                          _controller.markAsPaid();
+                          widget.onChanged?.call();
+                        } finally {
+                          if (mounted) setState(() => _actionLoading = false);
+                        }
+                      },
             borderRadius: BorderRadius.circular(12),
             side: alertLevel == AlertLevel.none
                 ? BorderSide.none
-                : BorderSide(color: alertColor.withAlpha(160), width: 1.4),
+                child: _actionLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Marcar como pagada'),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),

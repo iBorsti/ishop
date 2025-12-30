@@ -9,8 +9,10 @@ import '../models/fleet_financial_summary.dart';
 import '../models/fleet_payment.dart';
 import '../models/fleet_weekly_summary.dart';
 import '../../../core/utils/week_utils.dart';
+import '../../../core/config/app_env.dart';
+import 'fleet_jornada_repository.dart';
 
-class FleetJornadaService {
+class FleetJornadaDemoRepository implements FleetJornadaRepository {
   final Map<String, FleetBikeJornada> _jornadas = {};
   final Map<String, FleetBikeDebt> _debts = {};
   final Map<String, List<FleetBikeJornada>> _history = {};
@@ -18,11 +20,23 @@ class FleetJornadaService {
   bool _loaded = false;
 
   static const int dailyFee = 50;
-  static const _kJornadasKey = 'fleet_jornadas';
-  static const _kDebtsKey = 'fleet_debts';
-  static const _kHistoryKey = 'fleet_history';
-  static const _kPaymentsKey = 'fleet_payments';
+  String get _envKeyPrefix {
+    switch (AppConfig.env) {
+      case AppEnv.demo:
+        return 'demo_';
+      case AppEnv.pilot:
+        return 'pilot_';
+      case AppEnv.production:
+        return 'prod_';
+    }
+  }
 
+  String get _kJornadasKey => '${_envKeyPrefix}fleet_jornadas';
+  String get _kDebtsKey => '${_envKeyPrefix}fleet_debts';
+  String get _kHistoryKey => '${_envKeyPrefix}fleet_history';
+  String get _kPaymentsKey => '${_envKeyPrefix}fleet_payments';
+
+  @override
   Future<void> load() async {
     if (_loaded) return;
     final prefs = await SharedPreferences.getInstance();
@@ -31,28 +45,70 @@ class FleetJornadaService {
     final rawH = prefs.getString(_kHistoryKey);
     final rawP = prefs.getString(_kPaymentsKey);
     if (rawJ != null) {
-      // Legacy service wrapper; prefer FleetJornadaRepositoryFactory for new code.
-      // Kept to avoid breaking existing imports.
+      try {
+        final decoded = json.decode(rawJ) as Map<String, dynamic>;
+        decoded.forEach((bikeId, value) {
+          _jornadas[bikeId] = FleetBikeJornada.fromJson(
+            (value as Map).cast<String, dynamic>(),
+          );
+        });
+      } catch (_) {}
+    }
+    if (rawD != null) {
+      try {
+        final decoded = json.decode(rawD) as Map<String, dynamic>;
+        decoded.forEach((bikeId, value) {
+          _debts[bikeId] = FleetBikeDebt.fromJson(
+            (value as Map).cast<String, dynamic>(),
+          );
+        });
+      } catch (_) {}
+    }
+    if (rawH != null) {
+      try {
+        final decoded = json.decode(rawH) as Map<String, dynamic>;
+        decoded.forEach((bikeId, value) {
+          final list = (value as List)
+              .map((e) => FleetBikeJornada.fromJson(
+                    (e as Map).cast<String, dynamic>(),
+                  ))
+              .toList();
+          _history[bikeId] = list;
+        });
+      } catch (_) {}
+    }
+    if (rawP != null) {
+      try {
+        final decoded = json.decode(rawP) as List;
+        _payments
+          ..clear()
+          ..addAll(
+            decoded
+                .map((e) => FleetPayment.fromJson(
+                      (e as Map).cast<String, dynamic>(),
+                    ))
+                .toList(),
+          );
+      } catch (_) {}
+    }
+    _loaded = true;
+  }
 
-      import '../models/fleet_jornada.dart';
-      import '../repositories/fleet_jornada_repository_factory.dart';
-
-      class FleetJornadaService {
-        final _repo = FleetJornadaRepositoryFactory.create();
-
-        Future<List<FleetJornada>> fetchJornadas() => _repo.fetchJornadas();
-
-        Future<FleetJornada> addJornada(FleetJornada jornada) => _repo.addJornada(jornada);
-
-        Future<void> updateJornada(FleetJornada jornada) => _repo.updateJornada(jornada);
-
-        Future<void> deleteJornada(String id) => _repo.deleteJornada(id);
-
-        Future<void> deleteAll() => _repo.deleteAll();
-      }
+  Future<void> _persist() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jMap = _jornadas.map((k, v) => MapEntry(k, v.toJson()));
+    final dMap = _debts.map((k, v) => MapEntry(k, v.toJson()));
+    final hMap = _history.map(
+      (k, v) => MapEntry(k, v.map((j) => j.toJson()).toList()),
+    );
+    final pList = _payments.map((p) => p.toJson()).toList();
+    await prefs.setString(_kJornadasKey, json.encode(jMap));
+    await prefs.setString(_kDebtsKey, json.encode(dMap));
+    await prefs.setString(_kHistoryKey, json.encode(hMap));
     await prefs.setString(_kPaymentsKey, json.encode(pList));
   }
 
+  @override
   FleetBikeJornada getJornada(String bikeId) {
     return _jornadas.putIfAbsent(
       bikeId,
@@ -60,16 +116,19 @@ class FleetJornadaService {
     );
   }
 
+  @override
   FleetBikeDebt getDebt(String bikeId) {
     return _debts.putIfAbsent(bikeId, () => FleetBikeDebt.empty());
   }
 
+  @override
   void startJornada(String bikeId) {
     final current = getJornada(bikeId);
     _jornadas[bikeId] = current.copyWith(status: FleetJornadaStatus.active);
     _persist();
   }
 
+  @override
   void closeJornada(String bikeId, {bool paid = false}) {
     final current = getJornada(bikeId);
     final closed = current.copyWith(
@@ -86,6 +145,7 @@ class FleetJornadaService {
     _persist();
   }
 
+  @override
   void markAsPaid(String bikeId) {
     final current = getJornada(bikeId);
     _jornadas[bikeId] = current.copyWith(paid: true);
@@ -93,6 +153,7 @@ class FleetJornadaService {
     _persist();
   }
 
+  @override
   List<FleetBikeJornada> getBikeJornadaHistory(String bikeId) {
     final list = _history[bikeId] ?? [];
     return list
@@ -108,6 +169,7 @@ class FleetJornadaService {
     );
   }
 
+  @override
   void recordPayment({
     required double amount,
     required int bikesCovered,
@@ -128,16 +190,44 @@ class FleetJornadaService {
     _persist();
   }
 
+  @override
   List<FleetPayment> getPaymentHistory() =>
       List.unmodifiable(_payments.reversed);
 
+  @override
   int totalDebtAmount() =>
       _debts.values.fold(0, (sum, d) => sum + d.totalAmount);
+
+  @override
   int totalDaysOwed() => _debts.values.fold(0, (sum, d) => sum + d.daysOwed);
+
+  @override
   int totalBikes() => _jornadas.length;
+
+  @override
   int bikesWithDebtCount() =>
       _debts.values.where((d) => d.totalAmount > 0).length;
 
+  int _totalClosedJornadas() {
+    return _jornadas.values
+        .where((j) => j.status == FleetJornadaStatus.closed)
+        .length;
+  }
+
+  @override
+  FleetFinancialSummary getFinancialSummary() {
+    final closed = _totalClosedJornadas();
+    final expected = closed * dailyFee;
+    final debt = totalDebtAmount();
+    final paid = (expected - debt).clamp(0, expected).toDouble();
+    return FleetFinancialSummary(
+      expected: expected.toDouble(),
+      paid: paid,
+      debt: debt.toDouble(),
+    );
+  }
+
+  @override
   FleetWeeklySummary getWeeklySummary(DateTime date) {
     final start = startOfWeek(date);
     final end = endOfWeek(date);
@@ -146,7 +236,6 @@ class FleetJornadaService {
     int debtDays = 0;
     double debtAmount = 0;
 
-    // Count jornada history within week
     for (final entry in _history.entries) {
       for (final j in entry.value) {
         final reference = j.closedAt ?? j.date;
@@ -159,7 +248,6 @@ class FleetJornadaService {
       }
     }
 
-    // Include current jornadas if in week
     for (final j in _jornadas.values) {
       final reference = j.closedAt ?? j.date;
       if (reference.isBefore(start) || reference.isAfter(end)) continue;
@@ -177,24 +265,6 @@ class FleetJornadaService {
       bikeJornadas: bikeJornadas,
       debtDays: debtDays,
       debtAmount: debtAmount,
-    );
-  }
-
-  int _totalClosedJornadas() {
-    return _jornadas.values
-        .where((j) => j.status == FleetJornadaStatus.closed)
-        .length;
-  }
-
-  FleetFinancialSummary getFinancialSummary() {
-    final closed = _totalClosedJornadas();
-    final expected = closed * dailyFee;
-    final debt = totalDebtAmount();
-    final paid = (expected - debt).clamp(0, expected).toDouble();
-    return FleetFinancialSummary(
-      expected: expected.toDouble(),
-      paid: paid,
-      debt: debt.toDouble(),
     );
   }
 }
