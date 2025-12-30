@@ -9,6 +9,7 @@ import 'widgets/quota_progress_card.dart';
 import 'widgets/delivery_stat_section.dart';
 import 'widgets/jornada_status_card.dart';
 import '../../core/services/mock_api.dart';
+import 'delivery_payment_history_screen.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
   const DeliveryDashboard({super.key});
@@ -54,6 +55,23 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
       title: 'Delivery',
       children: [
         const JornadaStatusCard(),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const DeliveryPaymentHistoryScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.payments_outlined),
+            label: const Text('Pagos'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+          ),
+        ),
         const SizedBox(height: 16),
         const DashboardSectionTitle('Estado'),
         const AnimatedEntry(

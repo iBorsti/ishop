@@ -1,21 +1,25 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/fleet_bike_jornada.dart';
 import '../models/fleet_bike_debt.dart';
 import '../models/fleet_financial_summary.dart';
+import '../models/fleet_payment.dart';
 
 class FleetJornadaService {
   final Map<String, FleetBikeJornada> _jornadas = {};
   final Map<String, FleetBikeDebt> _debts = {};
   final Map<String, List<FleetBikeJornada>> _history = {};
+  final List<FleetPayment> _payments = [];
   bool _loaded = false;
 
   static const int dailyFee = 50;
   static const _kJornadasKey = 'fleet_jornadas';
   static const _kDebtsKey = 'fleet_debts';
   static const _kHistoryKey = 'fleet_history';
+  static const _kPaymentsKey = 'fleet_payments';
 
   Future<void> load() async {
     if (_loaded) return;
@@ -23,6 +27,7 @@ class FleetJornadaService {
     final rawJ = prefs.getString(_kJornadasKey);
     final rawD = prefs.getString(_kDebtsKey);
     final rawH = prefs.getString(_kHistoryKey);
+    final rawP = prefs.getString(_kPaymentsKey);
     if (rawJ != null) {
       try {
         final decoded = json.decode(rawJ) as Map<String, dynamic>;
@@ -56,6 +61,20 @@ class FleetJornadaService {
         });
       } catch (_) {}
     }
+    if (rawP != null) {
+      try {
+        final decoded = json.decode(rawP) as List;
+        _payments
+          ..clear()
+          ..addAll(
+            decoded
+                .map((e) => FleetPayment.fromJson(
+                      (e as Map).cast<String, dynamic>(),
+                    ))
+                .toList(),
+          );
+      } catch (_) {}
+    }
     _loaded = true;
   }
 
@@ -66,9 +85,11 @@ class FleetJornadaService {
     final hMap = _history.map(
       (k, v) => MapEntry(k, v.map((j) => j.toJson()).toList()),
     );
+    final pList = _payments.map((p) => p.toJson()).toList();
     await prefs.setString(_kJornadasKey, json.encode(jMap));
     await prefs.setString(_kDebtsKey, json.encode(dMap));
     await prefs.setString(_kHistoryKey, json.encode(hMap));
+    await prefs.setString(_kPaymentsKey, json.encode(pList));
   }
 
   FleetBikeJornada getJornada(String bikeId) {
@@ -118,6 +139,36 @@ class FleetJornadaService {
         .toList()
       ..sort((a, b) => b.closedAt!.compareTo(a.closedAt!));
   }
+
+  void clearAllDebts() {
+    _debts.updateAll((key, value) => FleetBikeDebt.empty());
+    _jornadas.updateAll(
+      (key, value) => value.copyWith(paid: true),
+    );
+  }
+
+  void recordPayment({
+    required double amount,
+    required int bikesCovered,
+    String recordedBy = 'admin',
+  }) {
+    if (amount <= 0 || bikesCovered <= 0) return;
+    _payments.add(
+      FleetPayment(
+        id: const Uuid().v4(),
+        paidAt: DateTime.now(),
+        amount: amount,
+        bikesCovered: bikesCovered,
+        recordedBy: recordedBy,
+      ),
+    );
+
+    clearAllDebts();
+    _persist();
+  }
+
+  List<FleetPayment> getPaymentHistory() =>
+      List.unmodifiable(_payments.reversed);
 
   int totalDebtAmount() =>
       _debts.values.fold(0, (sum, d) => sum + d.totalAmount);

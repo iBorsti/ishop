@@ -8,6 +8,7 @@ import 'widgets/fleet_bike_jornada_card.dart';
 import 'widgets/fleet_financial_summary_card.dart';
 import '../../core/widgets/dashboard_scaffold.dart';
 import '../../core/widgets/dashboard_section_title.dart';
+import 'fleet_payment_history_screen.dart';
 
 class FleetDashboard extends StatefulWidget {
   const FleetDashboard({super.key});
@@ -100,6 +101,23 @@ class _FleetDashboardState extends State<FleetDashboard> {
     return DashboardScaffold(
       title: 'Flota',
       children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const FleetPaymentHistoryScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.payments_outlined),
+            label: const Text('Pagos'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+          ),
+        ),
+        const SizedBox(height: 12),
         const DashboardSectionTitle('Finanzas de hoy'),
         FleetFinancialSummaryCard(summary: _service.getFinancialSummary()),
         const SizedBox(height: 12),
