@@ -14,11 +14,25 @@ class JornadaStatusCard extends StatefulWidget {
 
 class _JornadaStatusCardState extends State<JornadaStatusCard> {
   late final DeliveryJornadaController _controller;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
     _controller = DeliveryJornadaController(DeliveryJornadaService());
+    _initOnce();
+  }
+
+  Future<void> _initOnce() async {
+    if (_initialized) return;
+    _initialized = true;
+    await _controller.init();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   Color _statusColor(JornadaStatus status, bool paid) {
@@ -37,7 +51,16 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
+        if (_controller.loading) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
         final jornada = _controller.jornada;
+        final debt = _controller.debt;
         final color = _statusColor(jornada.status, jornada.paid);
 
         Widget actionButton;
@@ -59,7 +82,7 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
           case JornadaStatus.active:
             title = 'Jornada en curso';
             subtitle =
-                'Cuota del dia: C${jornada.dailyFee} • Estado: Pendiente';
+                'Cuota del día: C\$${jornada.dailyFee} • Estado: Pendiente';
             actionButton = ElevatedButton(
               onPressed: () => _controller.closeJornada(paid: false),
               style: ElevatedButton.styleFrom(
@@ -74,7 +97,7 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
               subtitle = 'Cuota pagada';
               actionButton = const SizedBox.shrink();
             } else {
-              subtitle = 'Cuota pendiente: C${jornada.dailyFee}';
+              subtitle = 'Cuota pendiente: C\$${jornada.dailyFee}';
               actionButton = ElevatedButton(
                 onPressed: _controller.markAsPaid,
                 style: ElevatedButton.styleFrom(
@@ -96,6 +119,43 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (debt.totalAmount > 0) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withAlpha(25),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.red.withAlpha(80)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Deuda pendiente',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text('Días adeudados: ${debt.daysOwed}'),
+                        Text('Total: C\$${debt.totalAmount}'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 Row(
                   children: [
                     Container(
