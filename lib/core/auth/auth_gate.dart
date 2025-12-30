@@ -18,6 +18,8 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   final AuthController _ctrl = AuthController.instance;
+  UserRole? _lastRole;
+  bool _navigating = false;
 
   Widget _homeFor(UserRole role) {
     switch (role) {
@@ -43,6 +45,20 @@ class _AuthGateState extends State<AuthGate> {
 
   void _onChange() => setState(() {});
 
+  void _navigateToHome(UserRole role) {
+    if (_navigating && _lastRole == role) return;
+    _navigating = true;
+    _lastRole = role;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => _homeFor(role)),
+        (_) => false,
+      );
+      _navigating = false;
+    });
+  }
+
   @override
   void dispose() {
     _ctrl.removeListener(_onChange);
@@ -57,7 +73,8 @@ class _AuthGateState extends State<AuthGate> {
       case AuthStatus.unauthenticated:
         return const LoginScreen();
       case AuthStatus.authenticated:
-        return _homeFor(_ctrl.user!.role);
+        _navigateToHome(_ctrl.user!.role);
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
   }
 }

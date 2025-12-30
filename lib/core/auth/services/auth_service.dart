@@ -5,6 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/app_user.dart';
 
+class AuthException implements Exception {
+  final String message;
+  const AuthException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 class AuthService {
   static const _kUserKey = 'auth_user_raw';
 
@@ -27,6 +35,13 @@ class AuthService {
     required String password,
     required UserRole role,
   }) async {
+    if (name.trim().isEmpty) throw const AuthException('Ingresa tu nombre');
+    if (!_isValidEmail(email)) {
+      throw const AuthException('Email no válido');
+    }
+    if (password.length < 4) {
+      throw const AuthException('Contraseña demasiado corta');
+    }
     await Future.delayed(const Duration(milliseconds: 350));
     final id =
         'u_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(999)}';
@@ -39,6 +54,12 @@ class AuthService {
     required String email,
     required String password,
   }) async {
+    if (!_isValidEmail(email)) {
+      throw const AuthException('Email no válido');
+    }
+    if (password.length < 4) {
+      throw const AuthException('Contraseña demasiado corta');
+    }
     await Future.delayed(const Duration(milliseconds: 320));
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_kUserKey);
@@ -65,4 +86,6 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kUserKey, user.toRawJson());
   }
+
+  bool _isValidEmail(String email) => email.contains('@');
 }

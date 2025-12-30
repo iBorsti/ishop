@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/auth/state/auth_controller.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/auth/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,8 +42,9 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passCtrl.text,
       );
     } catch (e) {
+      final msg = e is AuthException ? e.message : 'No se pudo iniciar sesión';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo iniciar sesión')),
+        SnackBar(content: Text(msg)),
       );
     } finally {
       if (mounted) setState(() => _loading = false);

@@ -11,10 +11,18 @@ class BuyerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return RoleGuard(
       requiredRole: UserRole.buyer,
+      allowIfUnauthenticated: true,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Inicio'),
-          actions: const [LogoutButton()],
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {},
+              tooltip: 'Buscar',
+            ),
+            const LogoutButton(),
+          ],
         ),
         body: const BuyerFeed(),
       ),

@@ -55,12 +55,41 @@ class ProductCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          'Vendedor: ${product.sellerName}',
-                          style: TextStyle(color: Colors.grey[600]),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.person,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                'Vendedor: ${product.sellerName}',
+                                style: TextStyle(color: Colors.grey[600]),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       ProductPriceChip(price: product.price),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.shopping_bag_outlined),
+                        label: const Text('Comprar'),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.share_outlined),
+                        label: const Text('Compartir'),
+                      ),
                     ],
                   ),
                 ],
