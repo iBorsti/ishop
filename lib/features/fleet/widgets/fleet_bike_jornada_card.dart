@@ -49,6 +49,12 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
     super.dispose();
   }
 
+  void _showMessage(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text)),
+    );
+  }
+
   Color _statusColor(FleetJornadaStatus status, bool paid) {
     switch (status) {
       case FleetJornadaStatus.notStarted:
@@ -92,6 +98,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
             actionButton = ElevatedButton(
               onPressed: () {
                 _controller.startJornada();
+                _showMessage('Jornada iniciada para ${widget.moto['id']}');
                 widget.onChanged();
               },
               style: ElevatedButton.styleFrom(
@@ -106,6 +113,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
             actionButton = ElevatedButton(
               onPressed: () {
                 _controller.closeJornada(paid: false);
+                _showMessage('Jornada cerrada para ${widget.moto['id']}');
                 widget.onChanged();
               },
               style: ElevatedButton.styleFrom(
@@ -124,6 +132,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
               actionButton = ElevatedButton(
                 onPressed: () {
                   _controller.markAsPaid();
+                  _showMessage('Cuota pagada para ${widget.moto['id']}');
                   widget.onChanged();
                 },
                 style: ElevatedButton.styleFrom(
@@ -225,11 +234,15 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
 class FleetBikeJornadaList extends StatefulWidget {
   final FleetJornadaService service;
   final List<Map<String, dynamic>> motos;
+  final bool autoLoad;
+  final VoidCallback? onChanged;
 
   const FleetBikeJornadaList({
     super.key,
     FleetJornadaService? service,
     List<Map<String, dynamic>>? motos,
+    this.autoLoad = true,
+    this.onChanged,
   })  : service = service ?? FleetJornadaService(),
         motos = motos ?? FleetService.getMotos();
 
@@ -247,11 +260,13 @@ class _FleetBikeJornadaListState extends State<FleetBikeJornadaList> {
   }
 
   Future<void> _init() async {
-    await widget.service.load();
-    for (final moto in widget.motos) {
-      final id = moto['id'] as String;
-      widget.service.getJornada(id);
-      widget.service.getDebt(id);
+    if (widget.autoLoad) {
+      await widget.service.load();
+      for (final moto in widget.motos) {
+        final id = moto['id'] as String;
+        widget.service.getJornada(id);
+        widget.service.getDebt(id);
+      }
     }
     if (mounted) {
       setState(() {
@@ -262,6 +277,7 @@ class _FleetBikeJornadaListState extends State<FleetBikeJornadaList> {
 
   void _refresh() {
     if (mounted) setState(() {});
+    widget.onChanged?.call();
   }
 
   @override
