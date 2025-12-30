@@ -7,6 +7,7 @@ import '../../core/widgets/dashboard_section_title.dart';
 import 'widgets/availability_toggle.dart';
 import 'widgets/quota_progress_card.dart';
 import 'widgets/delivery_stat_section.dart';
+import 'widgets/jornada_status_card.dart';
 import '../../core/services/mock_api.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
@@ -52,6 +53,8 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
     return DashboardScaffold(
       title: 'Delivery',
       children: [
+        const JornadaStatusCard(),
+        const SizedBox(height: 16),
         const DashboardSectionTitle('Estado'),
         const AnimatedEntry(
           delay: Duration(milliseconds: 100),

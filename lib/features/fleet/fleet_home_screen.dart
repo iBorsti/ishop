@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/auth/models/app_user.dart';
-import '../../core/auth/state/auth_controller.dart';
-import '../../core/auth/widgets/unauthorized_screen.dart';
 import '../../core/auth/widgets/logout_button.dart';
+import '../../core/auth/widgets/role_guard.dart';
 import 'fleet_dashboard.dart';
 
 class FleetHomeScreen extends StatelessWidget {
@@ -10,15 +9,15 @@ class FleetHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = AuthController.instance;
-    if (ctrl.user?.role != UserRole.fleet) return const UnauthorizedScreen();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flota'),
-        actions: const [LogoutButton()],
+    return RoleGuard(
+      requiredRole: UserRole.fleet,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Flota'),
+          actions: const [LogoutButton()],
+        ),
+        body: const FleetDashboard(),
       ),
-      body: const FleetDashboard(),
     );
   }
 }
