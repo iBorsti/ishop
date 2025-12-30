@@ -9,17 +9,20 @@ import '../models/fleet_financial_summary.dart';
 class FleetJornadaService {
   final Map<String, FleetBikeJornada> _jornadas = {};
   final Map<String, FleetBikeDebt> _debts = {};
+  final Map<String, List<FleetBikeJornada>> _history = {};
   bool _loaded = false;
 
   static const int dailyFee = 50;
   static const _kJornadasKey = 'fleet_jornadas';
   static const _kDebtsKey = 'fleet_debts';
+  static const _kHistoryKey = 'fleet_history';
 
   Future<void> load() async {
     if (_loaded) return;
     final prefs = await SharedPreferences.getInstance();
     final rawJ = prefs.getString(_kJornadasKey);
     final rawD = prefs.getString(_kDebtsKey);
+    final rawH = prefs.getString(_kHistoryKey);
     if (rawJ != null) {
       try {
         final decoded = json.decode(rawJ) as Map<String, dynamic>;
@@ -40,6 +43,19 @@ class FleetJornadaService {
         });
       } catch (_) {}
     }
+    if (rawH != null) {
+      try {
+        final decoded = json.decode(rawH) as Map<String, dynamic>;
+        decoded.forEach((bikeId, value) {
+          final list = (value as List)
+              .map((e) => FleetBikeJornada.fromJson(
+                    (e as Map).cast<String, dynamic>(),
+                  ))
+              .toList();
+          _history[bikeId] = list;
+        });
+      } catch (_) {}
+    }
     _loaded = true;
   }
 
@@ -47,8 +63,12 @@ class FleetJornadaService {
     final prefs = await SharedPreferences.getInstance();
     final jMap = _jornadas.map((k, v) => MapEntry(k, v.toJson()));
     final dMap = _debts.map((k, v) => MapEntry(k, v.toJson()));
+    final hMap = _history.map(
+      (k, v) => MapEntry(k, v.map((j) => j.toJson()).toList()),
+    );
     await prefs.setString(_kJornadasKey, json.encode(jMap));
     await prefs.setString(_kDebtsKey, json.encode(dMap));
+    await prefs.setString(_kHistoryKey, json.encode(hMap));
   }
 
   FleetBikeJornada getJornada(String bikeId) {
@@ -70,10 +90,14 @@ class FleetJornadaService {
 
   void closeJornada(String bikeId, {bool paid = false}) {
     final current = getJornada(bikeId);
-    _jornadas[bikeId] = current.copyWith(
+    final closed = current.copyWith(
       status: FleetJornadaStatus.closed,
       paid: paid,
+      closedAt: DateTime.now(),
     );
+    _jornadas[bikeId] = closed;
+    _history.putIfAbsent(bikeId, () => []);
+    _history[bikeId]!.add(closed);
     if (!paid) {
       _debts[bikeId] = getDebt(bikeId).addDay(current.dailyFee);
     }
@@ -85,6 +109,14 @@ class FleetJornadaService {
     _jornadas[bikeId] = current.copyWith(paid: true);
     _debts[bikeId] = getDebt(bikeId).clear();
     _persist();
+  }
+
+  List<FleetBikeJornada> getBikeJornadaHistory(String bikeId) {
+    final list = _history[bikeId] ?? [];
+    return list
+        .where((j) => j.isClosed && j.closedAt != null)
+        .toList()
+      ..sort((a, b) => b.closedAt!.compareTo(a.closedAt!));
   }
 
   int totalDebtAmount() =>

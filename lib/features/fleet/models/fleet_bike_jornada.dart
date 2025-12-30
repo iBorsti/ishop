@@ -6,6 +6,7 @@ class FleetBikeJornada {
   final FleetJornadaStatus status;
   final int dailyFee;
   final bool paid;
+  final DateTime? closedAt;
 
   const FleetBikeJornada({
     required this.bikeId,
@@ -13,6 +14,7 @@ class FleetBikeJornada {
     required this.status,
     required this.dailyFee,
     required this.paid,
+    this.closedAt,
   });
 
   factory FleetBikeJornada.notStarted(String bikeId, {int dailyFee = 50}) {
@@ -22,6 +24,7 @@ class FleetBikeJornada {
       status: FleetJornadaStatus.notStarted,
       dailyFee: dailyFee,
       paid: false,
+      closedAt: null,
     );
   }
 
@@ -29,6 +32,7 @@ class FleetBikeJornada {
     FleetJornadaStatus? status,
     bool? paid,
     DateTime? date,
+    DateTime? closedAt,
   }) {
     return FleetBikeJornada(
       bikeId: bikeId,
@@ -36,8 +40,11 @@ class FleetBikeJornada {
       status: status ?? this.status,
       dailyFee: dailyFee,
       paid: paid ?? this.paid,
+      closedAt: closedAt ?? this.closedAt,
     );
   }
+
+  bool get isClosed => status == FleetJornadaStatus.closed;
 
   Map<String, dynamic> toJson() => {
     'bikeId': bikeId,
@@ -45,6 +52,7 @@ class FleetBikeJornada {
     'status': status.name,
     'dailyFee': dailyFee,
     'paid': paid,
+    'closedAt': closedAt?.toIso8601String(),
   };
 
   factory FleetBikeJornada.fromJson(Map<String, dynamic> json) {
@@ -57,6 +65,7 @@ class FleetBikeJornada {
       ),
       dailyFee: json['dailyFee'] as int? ?? 50,
       paid: json['paid'] as bool? ?? false,
+      closedAt: DateTime.tryParse(json['closedAt'] as String? ?? ''),
     );
   }
 }
