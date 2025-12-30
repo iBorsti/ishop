@@ -77,6 +77,18 @@ class AuthService {
     return user;
   }
 
+  Future<AppUser> loginDemo(UserRole role) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    final user = AppUser(
+      id: 'demo_${role.name}_${DateTime.now().millisecondsSinceEpoch}',
+      name: 'Demo ${role.name}',
+      email: '${role.name}@demo.app',
+      role: role,
+    );
+    await _saveUser(user);
+    return user;
+  }
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_kUserKey);

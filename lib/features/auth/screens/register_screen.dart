@@ -21,6 +21,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _ctrl = AuthController.instance;
   bool _loading = false;
 
+  void _fillDemo() {
+    setState(() {
+      _nameCtrl.text = 'Demo User';
+      _emailCtrl.text = 'demo+buyer@demo.app';
+      _passCtrl.text = 'demo1234';
+      _selectedRole = UserRole.buyer;
+    });
+  }
+
   Future<void> _pickRole() async {
     final res = await Navigator.push<UserRole?>(
       context,
@@ -96,6 +105,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               Row(
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.flash_on),
+                    tooltip: 'Autocompletar demo',
+                    onPressed: _loading ? null : _fillDemo,
+                  ),
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _loading ? null : _pickRole,

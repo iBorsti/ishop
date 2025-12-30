@@ -56,6 +56,15 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> loginDemo(UserRole role) async {
+    status = AuthStatus.loading;
+    notifyListeners();
+    final u = await _service.loginDemo(role);
+    user = u;
+    status = AuthStatus.authenticated;
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     status = AuthStatus.loading;
     notifyListeners();

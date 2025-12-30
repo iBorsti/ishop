@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/auth/state/auth_controller.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/auth/services/auth_service.dart';
+import '../../../core/auth/models/app_user.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,9 +44,25 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } catch (e) {
       final msg = e is AuthException ? e.message : 'No se pudo iniciar sesión';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loginDemo(UserRole role) async {
+    setState(() => _loading = true);
+    try {
+      await _ctrl.loginDemo(role);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Sesión demo: ${role.name}')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No se pudo iniciar demo')));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -55,6 +72,16 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: const Text('Iniciar sesión'),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.maybePop(context),
+              )
+            : null,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -74,6 +101,46 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: Colors.grey[700]),
                   ),
                   const SizedBox(height: 24),
+                  Text(
+                    'Entrar como demo',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _DemoChip(
+                        label: 'Buyer',
+                        onTap: () => _loginDemo(UserRole.buyer),
+                        enabled: !_loading,
+                      ),
+                      _DemoChip(
+                        label: 'Seller',
+                        onTap: () => _loginDemo(UserRole.seller),
+                        enabled: !_loading,
+                      ),
+                      _DemoChip(
+                        label: 'Delivery',
+                        onTap: () => _loginDemo(UserRole.delivery),
+                        enabled: !_loading,
+                      ),
+                      _DemoChip(
+                        label: 'Flota',
+                        onTap: () => _loginDemo(UserRole.fleet),
+                        enabled: !_loading,
+                      ),
+                      _DemoChip(
+                        label: 'Admin',
+                        onTap: () => _loginDemo(UserRole.admin),
+                        enabled: !_loading,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -162,6 +229,28 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DemoChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  final bool enabled;
+
+  const _DemoChip({
+    required this.label,
+    required this.onTap,
+    required this.enabled,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      label: Text(label),
+      onPressed: enabled ? onTap : null,
+      backgroundColor: enabled ? Colors.blueGrey[50] : Colors.grey[300],
+      elevation: enabled ? 2 : 0,
     );
   }
 }
