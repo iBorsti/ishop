@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_gradients.dart';
-import '../buyer/buyer_home_screen.dart';
-import '../seller/seller_home_screen.dart';
-import '../delivery/delivery_home_screen.dart';
-import '../fleet/fleet_home_screen.dart';
+import '../../core/auth/models/app_user.dart';
 
 class RoleSelectorScreen extends StatelessWidget {
   const RoleSelectorScreen({super.key});
@@ -14,7 +11,7 @@ class RoleSelectorScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('¿Cómo quieres usar la app?'),
+        title: const Text('Selecciona un rol'),
         centerTitle: true,
         elevation: 0,
       ),
@@ -26,52 +23,39 @@ class RoleSelectorScreen extends StatelessWidget {
           mainAxisSpacing: 16,
           children: [
             _RoleCard(
+              role: UserRole.buyer,
               icon: Icons.shopping_cart,
               title: 'Comprar',
               subtitle: 'Explora productos',
               gradient: AppGradients.buyer,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const BuyerHomeScreen()),
-                );
-              },
             ),
             _RoleCard(
+              role: UserRole.seller,
               icon: Icons.storefront,
               title: 'Vender',
               subtitle: 'Gestiona tu tienda',
               gradient: AppGradients.seller,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SellerHomeScreen()),
-                );
-              },
             ),
             _RoleCard(
+              role: UserRole.delivery,
               icon: Icons.delivery_dining,
               title: 'Delivery',
               subtitle: 'Recoge y entrega',
               gradient: AppGradients.delivery,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DeliveryHomeScreen()),
-                );
-              },
             ),
             _RoleCard(
+              role: UserRole.fleet,
               icon: Icons.directions_bike,
               title: 'Flota',
               subtitle: 'Administra vehículos',
               gradient: AppGradients.fleet,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FleetHomeScreen()),
-                );
-              },
+            ),
+            _RoleCard(
+              role: UserRole.admin,
+              icon: Icons.admin_panel_settings,
+              title: 'Admin',
+              subtitle: 'Panel administrativo',
+              gradient: AppGradients.admin,
             ),
           ],
         ),
@@ -81,18 +65,18 @@ class RoleSelectorScreen extends StatelessWidget {
 }
 
 class _RoleCard extends StatefulWidget {
+  final UserRole role;
   final IconData icon;
   final String title;
   final String subtitle;
   final LinearGradient gradient;
-  final VoidCallback onTap;
 
   const _RoleCard({
+    required this.role,
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.gradient,
-    required this.onTap,
   });
 
   @override
@@ -107,7 +91,7 @@ class _RoleCardState extends State<_RoleCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: () => Navigator.pop(context, widget.role),
       onTapDown: (_) => _setPressed(true),
       onTapCancel: () => _setPressed(false),
       onTapUp: (_) => _setPressed(false),

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../core/auth/models/app_user.dart';
+import '../../core/auth/state/auth_controller.dart';
+import '../../core/auth/widgets/unauthorized_screen.dart';
+import '../../core/auth/widgets/logout_button.dart';
 import 'buyer_feed.dart';
 
 class BuyerHomeScreen extends StatelessWidget {
@@ -6,13 +10,13 @@ class BuyerHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ctrl = AuthController.instance;
+    if (ctrl.user?.role != UserRole.buyer) return const UnauthorizedScreen();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inicio'),
-        actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.person), onPressed: () {}),
-        ],
+        actions: const [LogoutButton()],
       ),
       body: const BuyerFeed(),
     );

@@ -25,4 +25,10 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  static const LinearGradient admin = LinearGradient(
+    colors: [Color(0xFF333333), Color(0xFF666666)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }
