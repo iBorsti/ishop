@@ -5,9 +5,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: const Center(child: Text('Pantalla de login')),
-    );
+    return const SizedBox.shrink();
   }
 }

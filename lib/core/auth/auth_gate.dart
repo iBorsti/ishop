@@ -7,6 +7,7 @@ import '../../features/seller/seller_home_screen.dart';
 import '../../features/delivery/delivery_home_screen.dart';
 import '../../features/fleet/fleet_home_screen.dart';
 import '../../features/admin/admin_home_screen.dart';
+import '../../features/auth/screens/login_screen.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -54,7 +55,7 @@ class _AuthGateState extends State<AuthGate> {
       case AuthStatus.loading:
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       case AuthStatus.unauthenticated:
-        return const Scaffold(body: Center(child: Text('Login')));
+        return const LoginScreen();
       case AuthStatus.authenticated:
         return _homeFor(_ctrl.user!.role);
     }
