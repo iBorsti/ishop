@@ -117,7 +117,6 @@ class _FleetPaymentHistoryScreenState extends State<FleetPaymentHistoryScreen> {
                           _service.recordPayment(
                             amount: amount,
                             bikesCovered: bikes,
-                            recordedBy: 'admin',
                           );
                           Navigator.of(ctx).pop(true);
                         },

@@ -119,7 +119,6 @@ class _DeliveryPaymentHistoryScreenState
                           _service.recordPayment(
                             amount: amount,
                             jornadasCovered: jornadas,
-                            recordedBy: 'delivery',
                           );
                           Navigator.of(ctx).pop(true);
                         },

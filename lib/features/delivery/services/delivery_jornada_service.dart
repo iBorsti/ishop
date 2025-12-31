@@ -1,157 +1,26 @@
-import 'dart:convert';
-
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
-
-import '../models/delivery_jornada.dart';
 import '../models/delivery_debt.dart';
+import '../models/delivery_jornada.dart';
 import '../models/delivery_payment.dart';
 import '../models/delivery_weekly_summary.dart';
-import '../../../core/utils/week_utils.dart';
+import 'delivery_jornada_repository.dart';
+import 'delivery_jornada_factory.dart';
 
+// Legacy service wrapper to keep existing imports working. Prefer using
+// DeliveryJornadaRepository directly via buildDeliveryJornadaRepository().
 class DeliveryJornadaService {
-  DeliveryJornada _jornada = DeliveryJornada.todayNotStarted();
-  DeliveryDebt _debt = DeliveryDebt.empty();
-  final List<DeliveryJornada> _history = [];
-  final List<DeliveryPayment> _payments = [];
-  bool _loaded = false;
+  final DeliveryJornadaRepository _repo = buildDeliveryJornadaRepository();
 
-  static const _kJornadaKey = 'delivery_jornada';
-  static const _kDebtKey = 'delivery_debt';
-  static const _kHistoryKey = 'delivery_history';
-  static const _kPaymentsKey = 'delivery_payments';
-
-  DeliveryJornada getCurrentJornada() {
-    return _jornada;
-  }
-
-  DeliveryDebt getDebt() {
-    return _debt;
-  }
-
-  List<DeliveryJornada> getJornadaHistory({DateTime? from, DateTime? to}) {
-    return _history
-        .where((j) => j.isClosed)
-        .where((j) {
-          if (from != null && (j.closedAt ?? j.date).isBefore(from)) {
-            return false;
-          }
-          if (to != null && (j.closedAt ?? j.date).isAfter(to)) {
-            return false;
-          }
-          return true;
-        })
-        .toList()
-      ..sort(
-        (a, b) => (b.closedAt ?? b.date).compareTo(a.closedAt ?? a.date),
-      );
-  }
-
-  Future<void> load() async {
-    if (_loaded) return;
-    final prefs = await SharedPreferences.getInstance();
-    final rawJ = prefs.getString(_kJornadaKey);
-    final rawD = prefs.getString(_kDebtKey);
-    final rawH = prefs.getString(_kHistoryKey);
-    final rawP = prefs.getString(_kPaymentsKey);
-    if (rawJ != null) {
-      // Legacy service wrapper; prefer DeliveryJornadaRepositoryFactory for new code.
-      // Kept to avoid breaking existing imports.
-
-      import '../models/delivery_jornada.dart';
-      import '../repositories/delivery_jornada_repository_factory.dart';
-
-      class DeliveryJornadaService {
-        final _repo = DeliveryJornadaRepositoryFactory.create();
-
-        Future<List<DeliveryJornada>> fetchJornadas() => _repo.fetchJornadas();
-
-        Future<DeliveryJornada> addJornada(DeliveryJornada jornada) => _repo.addJornada(jornada);
-
-        Future<void> updateJornada(DeliveryJornada jornada) => _repo.updateJornada(jornada);
-
-        Future<void> deleteJornada(String id) => _repo.deleteJornada(id);
-
-        Future<void> deleteAll() => _repo.deleteAll();
-      }
-    final closed = _jornada.copyWith(
-      status: JornadaStatus.closed,
-      paid: paid,
-      closedAt: DateTime.now(),
-    );
-    _jornada = closed;
-    _history.add(closed);
-
-    if (!paid) {
-      _debt = _debt.addDay(_jornada.dailyFee);
-    }
-    _persist();
-  }
-
-  void markAsPaid() {
-    final amount = (_debt.totalAmount + _jornada.dailyFee).toDouble();
-    final covered = _debt.daysOwed + 1;
-    recordPayment(amount: amount, jornadasCovered: covered);
-  }
-
-  void recordPayment({
-    required double amount,
-    required int jornadasCovered,
-    String recordedBy = 'delivery',
-  }) {
-    if (amount <= 0 || jornadasCovered <= 0) return;
-    _payments.add(
-      DeliveryPayment(
-        id: const Uuid().v4(),
-        paidAt: DateTime.now(),
-        amount: amount,
-        jornadasCovered: jornadasCovered,
-        recordedBy: recordedBy,
-      ),
-    );
-
-    _jornada = _jornada.copyWith(paid: true);
-    _debt = _debt.clear();
-    _persist();
-  }
-
-  List<DeliveryPayment> getPaymentHistory() =>
-      List.unmodifiable(_payments.reversed);
-
-  DeliveryWeeklySummary getWeeklySummary(DateTime date) {
-    final start = startOfWeek(date);
-    final end = endOfWeek(date);
-
-    int worked = 0;
-    int paid = 0;
-    int pending = 0;
-    double pendingAmount = 0;
-
-    Iterable<DeliveryJornada> candidates = _history;
-
-    // Include current jornada if it falls within the week
-    if (_jornada.date.isAfter(start.subtract(const Duration(days: 1))) &&
-        _jornada.date.isBefore(end.add(const Duration(days: 1)))) {
-      candidates = [..._history, _jornada];
-    }
-
-    for (final j in candidates) {
-      final reference = j.closedAt ?? j.date;
-      if (reference.isBefore(start) || reference.isAfter(end)) continue;
-      worked += 1;
-      if (j.paid) {
-        paid += 1;
-      } else {
-        pending += 1;
-        pendingAmount += j.dailyFee.toDouble();
-      }
-    }
-
-    return DeliveryWeeklySummary(
-      worked: worked,
-      paid: paid,
-      pending: pending,
-      pendingAmount: pendingAmount,
-    );
-  }
+  Future<void> load() => _repo.load();
+  DeliveryJornada getCurrentJornada() => _repo.getCurrentJornada();
+  DeliveryDebt getDebt() => _repo.getDebt();
+  List<DeliveryJornada> getJornadaHistory({DateTime? from, DateTime? to}) =>
+      _repo.getJornadaHistory(from: from, to: to);
+  List<DeliveryPayment> getPaymentHistory() => _repo.getPaymentHistory();
+  void startJornada() => _repo.startJornada();
+  void closeJornada({bool paid = false}) => _repo.closeJornada(paid: paid);
+  void markAsPaid() => _repo.markAsPaid();
+  void recordPayment({required double amount, required int jornadasCovered}) =>
+      _repo.recordPayment(amount: amount, jornadasCovered: jornadasCovered);
+  DeliveryWeeklySummary getWeeklySummary(DateTime date) =>
+      _repo.getWeeklySummary(date);
 }

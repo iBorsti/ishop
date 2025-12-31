@@ -79,6 +79,7 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
             ),
           );
         }
+
         final jornada = _controller.jornada;
         final debt = _controller.debt;
         final color = _statusColor(jornada.status, jornada.paid);
@@ -107,30 +108,8 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
           case JornadaStatus.active:
             title = 'Jornada en curso';
             subtitle =
-                'Cuota del día: C\$${jornada.dailyFee} • Estado: Pendiente';
+              'Cuota del día: C\$${jornada.dailyFee} • Estado: Pendiente';
             actionButton = ElevatedButton(
-              onPressed: () async {
-                final confirmed = await showConfirmDialog(
-                  context: context,
-                  title: 'Cerrar jornada',
-                  message:
-                      '¿Seguro que deseas cerrar la jornada? Esta acción no se puede deshacer.',
-                );
-                if (confirmed != true) return;
-                _controller.closeJornada(paid: false);
-                widget.onChanged?.call();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
-              ),
-              child: const Text('Cerrar jornada'),
-            );
-            break;
-          case JornadaStatus.closed:
-            title = 'Jornada cerrada';
-            if (jornada.paid) {
-              subtitle = 'Cuota pagada';
-              actionButton = const SizedBox.shrink();
               onPressed: _actionLoading
                   ? null
                   : () async {
@@ -150,9 +129,9 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                         if (mounted) setState(() => _actionLoading = false);
                       }
                     },
-              subtitle = 'Cuota pendiente: C\$${jornada.dailyFee}';
-              actionButton = ElevatedButton(
-                onPressed: () async {
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+              ),
               child: _actionLoading
                   ? const SizedBox(
                       width: 16,
@@ -160,16 +139,16 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Text('Cerrar jornada'),
-                    context: context,
-                    title: 'Registrar pago',
-                    message:
-                        'Este registro limpiará la deuda actual. ¿Deseas continuar?',
-                  );
-                  if (confirmed != true) return;
-                  _controller.markAsPaid();
-                  widget.onChanged?.call();
-                },
-                style: ElevatedButton.styleFrom(
+            );
+            break;
+          case JornadaStatus.closed:
+            title = 'Jornada cerrada';
+            if (jornada.paid) {
+              subtitle = 'Cuota pagada';
+              actionButton = const SizedBox.shrink();
+            } else {
+              subtitle = 'Cuota pendiente: C\$${jornada.dailyFee}';
+              actionButton = ElevatedButton(
                 onPressed: _actionLoading
                     ? null
                     : () async {
@@ -189,9 +168,9 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                           if (mounted) setState(() => _actionLoading = false);
                         }
                       },
-            borderRadius: BorderRadius.circular(12),
-            side: alertLevel == AlertLevel.none
-                ? BorderSide.none
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                ),
                 child: _actionLoading
                     ? const SizedBox(
                         width: 16,
@@ -199,6 +178,18 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Text('Marcar como pagada'),
+              );
+            }
+            break;
+        }
+
+        return Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: alertLevel == AlertLevel.none
+                ? BorderSide.none
+                : BorderSide(color: alertColor.withAlpha(160), width: 1.4),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
