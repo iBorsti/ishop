@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/auth/widgets/role_guard.dart';
 import '../../core/auth/models/app_user.dart';
+import '../../core/auth/state/auth_controller.dart';
 import 'mandadito_service.dart';
 
 class BuyerMandaditoCreateScreen extends StatefulWidget {
@@ -43,6 +44,7 @@ class _BuyerMandaditoCreateScreenState
     }
     final budgetText = _budgetCtrl.text.trim();
     final budget = budgetText.isEmpty ? null : double.tryParse(budgetText);
+    final ownerId = AuthController.instance.user?.id ?? '';
 
     setState(() => _submitting = true);
     await MandaditoService.createMandadito(
@@ -51,6 +53,7 @@ class _BuyerMandaditoCreateScreenState
       destination: destination,
       urgent: _urgent,
       budget: budget,
+      createdBy: ownerId,
     );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

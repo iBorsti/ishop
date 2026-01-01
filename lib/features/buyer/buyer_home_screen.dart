@@ -4,6 +4,7 @@ import '../../core/auth/widgets/logout_button.dart';
 import '../../core/auth/widgets/role_guard.dart';
 import 'buyer_feed.dart';
 import '../mandaditos/buyer_mandadito_create_screen.dart';
+import '../mandaditos/buyer_mandadito_list_screen.dart';
 
 class BuyerHomeScreen extends StatelessWidget {
   const BuyerHomeScreen({super.key});
@@ -28,9 +29,37 @@ class BuyerHomeScreen extends StatelessWidget {
         body: const BuyerFeed(),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const BuyerMandaditoCreateScreen(),
+            showModalBottomSheet(
+              context: context,
+              builder: (_) => SafeArea(
+                child: Wrap(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.add_task),
+                      title: const Text('Publicar mandadito'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const BuyerMandaditoCreateScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.list_alt),
+                      title: const Text('Ver mis mandaditos'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const BuyerMandaditoListScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           },

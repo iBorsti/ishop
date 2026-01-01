@@ -12,6 +12,8 @@ class Mandadito {
   final bool urgent;
   final double? budget;
   final MandaditoStatus status;
+  final String createdBy;
+  final String? takenBy;
 
   const Mandadito({
     required this.id,
@@ -21,9 +23,11 @@ class Mandadito {
     required this.urgent,
     required this.budget,
     required this.status,
+    required this.createdBy,
+    required this.takenBy,
   });
 
-  Mandadito copyWith({MandaditoStatus? status}) {
+  Mandadito copyWith({MandaditoStatus? status, String? takenBy}) {
     return Mandadito(
       id: id,
       origin: origin,
@@ -32,6 +36,8 @@ class Mandadito {
       urgent: urgent,
       budget: budget,
       status: status ?? this.status,
+      createdBy: createdBy,
+      takenBy: takenBy ?? this.takenBy,
     );
   }
 
@@ -43,6 +49,8 @@ class Mandadito {
         'urgent': urgent,
         'budget': budget,
         'status': status.name,
+        'createdBy': createdBy,
+        'takenBy': takenBy,
       };
 
   factory Mandadito.fromJson(Map<String, dynamic> json) {
@@ -59,6 +67,8 @@ class Mandadito {
       urgent: json['urgent'] as bool? ?? false,
       budget: (json['budget'] as num?)?.toDouble(),
       status: status,
+      createdBy: json['createdBy'] as String? ?? '',
+      takenBy: json['takenBy'] as String?,
     );
   }
 }
