@@ -3,9 +3,11 @@ import 'package:intl/intl.dart';
 
 import '../../core/auth/models/app_user.dart';
 import '../../core/auth/state/auth_controller.dart';
+import '../../core/config/app_env.dart';
 import '../../core/auth/widgets/logout_button.dart';
 import '../../core/auth/widgets/role_guard.dart';
 import '../../core/widgets/confirm_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'models/seller_post.dart';
 import 'services/seller_post_service.dart';
 import 'seller_create_discount_screen.dart';
@@ -21,17 +23,35 @@ class SellerHomeScreen extends StatefulWidget {
 class _SellerHomeScreenState extends State<SellerHomeScreen> {
   late Future<List<SellerPost>> _future;
   String _userId = '';
+  bool _open = true;
 
   @override
   void initState() {
     super.initState();
     _userId = AuthController.instance.user?.id ?? '';
     _future = _load();
+    _loadOpenState();
   }
 
   Future<List<SellerPost>> _load() async {
     if (_userId.isEmpty) return [];
     return SellerPostService.getMyPosts(_userId);
+  }
+
+  Future<void> _loadOpenState() async {
+    if (_userId.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'seller_open_${AppConfig.env.name}_$_userId';
+    final value = prefs.getBool(key);
+    setState(() => _open = value ?? true);
+  }
+
+  Future<void> _toggleOpen(bool value) async {
+    if (_userId.isEmpty) return;
+    setState(() => _open = value);
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'seller_open_${AppConfig.env.name}_$_userId';
+    await prefs.setBool(key, value);
   }
 
   Future<void> _refresh() async {
@@ -97,7 +117,11 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    _Header(userId: _userId),
+                    _Header(
+                      userId: _userId,
+                      open: _open,
+                      onToggleOpen: _toggleOpen,
+                    ),
                     const SizedBox(height: 12),
                     _QuickActions(
                       onProduct: () => _openCreateProduct(),
@@ -115,7 +139,12 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
-                    if (snapshot.connectionState == ConnectionState.waiting)
+                    if (!_open)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Text('Tu tienda está cerrada. Al abrirla volverás a mostrar tus publicaciones.'),
+                      )
+                    else if (snapshot.connectionState == ConnectionState.waiting)
                       const Center(child: Padding(
                         padding: EdgeInsets.all(24),
                         child: CircularProgressIndicator(),
@@ -155,8 +184,14 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
 class _Header extends StatelessWidget {
   final String userId;
+  final bool open;
+  final ValueChanged<bool> onToggleOpen;
 
-  const _Header({required this.userId});
+  const _Header({
+    required this.userId,
+    required this.open,
+    required this.onToggleOpen,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -193,10 +228,20 @@ class _Header extends StatelessWidget {
                   const Text('Categoría: Comida'),
                   const SizedBox(height: 4),
                   Row(
-                    children: const [
-                      Icon(Icons.circle, color: Colors.green, size: 10),
-                      SizedBox(width: 6),
-                      Text('Abierto'),
+                    children: [
+                      Icon(
+                        Icons.circle,
+                        color: open ? Colors.green : Colors.red,
+                        size: 10,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(open ? 'Abierto' : 'Cerrado'),
+                      const SizedBox(width: 12),
+                      Switch(
+                        value: open,
+                        onChanged: onToggleOpen,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                     ],
                   ),
                 ],

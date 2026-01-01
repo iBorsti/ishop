@@ -43,7 +43,8 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
     if (_saving) return;
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) return;
-    final userId = AuthController.instance.user?.id ?? '';
+    final user = AuthController.instance.user;
+    final userId = user?.id ?? '';
     if (userId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Inicia sesión como vendedor')),
@@ -59,6 +60,7 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
         userId: userId,
         description: description,
         price: price,
+        sellerName: user?.name ?? 'Vendedor',
       );
     } else {
       await SellerPostService.updatePost(
@@ -66,6 +68,7 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
         postId: widget.initial!.id,
         description: description,
         price: price,
+        sellerName: user?.name,
       );
     }
     if (!mounted) return;

@@ -6,9 +6,37 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/config/app_env.dart';
 import '../models/seller_post.dart';
 
+class BuyerHighlight {
+  final String description;
+  final String sellerName;
+  final DateTime createdAt;
+
+  const BuyerHighlight({
+    required this.description,
+    required this.sellerName,
+    required this.createdAt,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'description': description,
+        'sellerName': sellerName,
+        'createdAt': createdAt.toIso8601String(),
+      };
+
+  factory BuyerHighlight.fromJson(Map<String, dynamic> json) {
+    return BuyerHighlight(
+      description: json['description'] as String? ?? '',
+      sellerName: json['sellerName'] as String? ?? 'Vendedor',
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+    );
+  }
+}
+
 class SellerPostService {
   static String _key(String userId) =>
       'seller_posts_${AppConfig.env.name}_$userId';
+  static String _highlightKey() => 'buyer_highlight_discounts_${AppConfig.env.name}';
 
   static Future<List<SellerPost>> _loadAll(String userId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -34,6 +62,7 @@ class SellerPostService {
     required String userId,
     required String description,
     required double price,
+    required String sellerName,
   }) async {
     final post = SellerPost(
       id: 'post_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(9999)}',
@@ -42,6 +71,7 @@ class SellerPostService {
       price: price,
       createdAt: DateTime.now(),
       active: true,
+      sellerName: sellerName,
     );
     final items = await _loadAll(userId);
     items.insert(0, post);
@@ -52,6 +82,7 @@ class SellerPostService {
   static Future<SellerPost> createDiscount({
     required String userId,
     required String description,
+    required String sellerName,
   }) async {
     final post = SellerPost(
       id: 'post_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(9999)}',
@@ -60,10 +91,12 @@ class SellerPostService {
       price: null,
       createdAt: DateTime.now(),
       active: true,
+      sellerName: sellerName,
     );
     final items = await _loadAll(userId);
     items.insert(0, post);
     await _saveAll(userId, items);
+    await _addHighlight(post);
     return post;
   }
 
@@ -72,11 +105,13 @@ class SellerPostService {
     required String postId,
     required String description,
     double? price,
+    String? sellerName,
   }) async {
     final items = await _loadAll(userId);
     final idx = items.indexWhere((p) => p.id == postId);
     if (idx == -1) return;
-    items[idx] = items[idx].copyWith(description: description, price: price);
+    items[idx] = items[idx]
+        .copyWith(description: description, price: price, sellerName: sellerName);
     await _saveAll(userId, items);
   }
 
@@ -87,5 +122,39 @@ class SellerPostService {
     final items = await _loadAll(userId);
     items.removeWhere((p) => p.id == postId);
     await _saveAll(userId, items);
+  }
+
+  static Future<List<BuyerHighlight>> getDiscountHighlights() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_highlightKey());
+    if (raw == null) return [];
+    final data = jsonDecode(raw) as List<dynamic>;
+    return data
+        .map((e) => BuyerHighlight.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  static Future<void> _addHighlight(SellerPost post) async {
+    if (post.type != SellerPostType.discount) return;
+    final prefs = await SharedPreferences.getInstance();
+    final existingRaw = prefs.getString(_highlightKey());
+    List<BuyerHighlight> current = [];
+    if (existingRaw != null) {
+      final data = jsonDecode(existingRaw) as List<dynamic>;
+      current = data
+          .map((e) => BuyerHighlight.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    current.insert(
+      0,
+      BuyerHighlight(
+        description: post.description,
+        sellerName: post.sellerName,
+        createdAt: post.createdAt,
+      ),
+    );
+    if (current.length > 10) current = current.sublist(0, 10);
+    final raw = jsonEncode(current.map((e) => e.toJson()).toList());
+    await prefs.setString(_highlightKey(), raw);
   }
 }
