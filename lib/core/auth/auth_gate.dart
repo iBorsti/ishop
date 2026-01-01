@@ -8,6 +8,8 @@ import '../../features/delivery/delivery_home_screen.dart';
 import '../../features/fleet/fleet_home_screen.dart';
 import '../../features/admin/admin_home_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
+import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/onboarding/onboarding_service.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -20,6 +22,8 @@ class _AuthGateState extends State<AuthGate> {
   final AuthController _ctrl = AuthController.instance;
   UserRole? _lastRole;
   bool _navigating = false;
+  Future<bool>? _onboardingFuture;
+  String? _onboardingUserId;
 
   Widget _homeFor(UserRole role) {
     switch (role) {
@@ -43,7 +47,12 @@ class _AuthGateState extends State<AuthGate> {
     _ctrl.init();
   }
 
-  void _onChange() => setState(() {});
+  void _onChange() => setState(() {
+        if (_ctrl.status != AuthStatus.authenticated) {
+          _onboardingFuture = null;
+          _onboardingUserId = null;
+        }
+      });
 
   void _navigateToHome(UserRole role) {
     if (_navigating && _lastRole == role) return;
@@ -57,6 +66,27 @@ class _AuthGateState extends State<AuthGate> {
       );
       _navigating = false;
     });
+  }
+
+  OnboardingRole? _onboardingRoleFor(UserRole role) {
+    switch (role) {
+      case UserRole.delivery:
+        return OnboardingRole.delivery;
+      case UserRole.fleet:
+        return OnboardingRole.fleet;
+      case UserRole.buyer:
+        return OnboardingRole.buyer;
+      case UserRole.seller:
+      case UserRole.admin:
+        return null;
+    }
+  }
+
+  void _ensureOnboardingFuture(AppUser user, OnboardingRole role) {
+    if (_onboardingFuture != null && _onboardingUserId == user.id) return;
+    _onboardingUserId = user.id;
+    _onboardingFuture =
+        OnboardingService.hasCompletedOnboarding(user.id, role);
   }
 
   @override
@@ -73,8 +103,36 @@ class _AuthGateState extends State<AuthGate> {
       case AuthStatus.unauthenticated:
         return const LoginScreen();
       case AuthStatus.authenticated:
-        _navigateToHome(_ctrl.user!.role);
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        final user = _ctrl.user!;
+        final onboardingRole = _onboardingRoleFor(user.role);
+        if (onboardingRole == null) {
+          _navigateToHome(user.role);
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
+        _ensureOnboardingFuture(user, onboardingRole);
+        return FutureBuilder<bool>(
+          future: _onboardingFuture,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final completed = snapshot.data ?? false;
+            if (!completed) {
+              return OnboardingScreen(
+                role: onboardingRole,
+                userId: user.id,
+                onFinished: () => _navigateToHome(user.role),
+              );
+            }
+            _navigateToHome(user.role);
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          },
+        );
     }
   }
 }

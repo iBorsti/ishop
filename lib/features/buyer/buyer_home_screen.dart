@@ -3,6 +3,7 @@ import '../../core/auth/models/app_user.dart';
 import '../../core/auth/widgets/logout_button.dart';
 import '../../core/auth/widgets/role_guard.dart';
 import 'buyer_feed.dart';
+import '../mandaditos/buyer_mandadito_create_screen.dart';
 
 class BuyerHomeScreen extends StatelessWidget {
   const BuyerHomeScreen({super.key});
@@ -25,6 +26,17 @@ class BuyerHomeScreen extends StatelessWidget {
           ],
         ),
         body: const BuyerFeed(),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const BuyerMandaditoCreateScreen(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.assignment),
+          label: const Text('Mandaditos'),
+        ),
       ),
     );
   }
