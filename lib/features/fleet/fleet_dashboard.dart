@@ -16,6 +16,8 @@ import '../../core/alerts/models/alert_level.dart';
 import '../../core/widgets/weekly_summary_card.dart';
 import 'models/fleet_weekly_summary.dart';
 import '../../core/utils/week_utils.dart';
+import '../../core/config/app_env.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 class FleetDashboard extends StatefulWidget {
   const FleetDashboard({super.key});
@@ -28,9 +30,11 @@ class _FleetDashboardState extends State<FleetDashboard> {
   final FleetJornadaRepository _service = buildFleetJornadaRepository();
   late final List<Map<String, dynamic>> _motos;
   bool _loading = true;
+  String? _error;
   FleetWeeklySummary? _weeklySummary;
   FleetWeeklySummary? _prevWeeklySummary;
   String? _weekLabel;
+  bool _resetting = false;
 
   @override
   void initState() {
@@ -40,20 +44,60 @@ class _FleetDashboardState extends State<FleetDashboard> {
   }
 
   Future<void> _init() async {
-    await _service.load();
-    for (final moto in _motos) {
-      final id = moto['id'] as String;
-      _service.getJornada(id);
-      _service.getDebt(id);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await _service.load();
+      for (final moto in _motos) {
+        final id = moto['id'] as String;
+        _service.getJornada(id);
+        _service.getDebt(id);
+      }
+      _weeklySummary = _service.getWeeklySummary(DateTime.now());
+      _prevWeeklySummary =
+          _service.getWeeklySummary(DateTime.now().subtract(const Duration(days: 7)));
+      _weekLabel = weekRangeLabel(DateTime.now());
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _error = 'No se pudieron cargar los datos';
+          _loading = false;
+        });
+      }
     }
-    _weeklySummary = _service.getWeeklySummary(DateTime.now());
-    _prevWeeklySummary =
-        _service.getWeeklySummary(DateTime.now().subtract(const Duration(days: 7)));
-    _weekLabel = weekRangeLabel(DateTime.now());
-    if (mounted) {
-      setState(() {
-        _loading = false;
-      });
+  }
+
+  Future<void> _resetDemo() async {
+    if (!AppConfig.isDemo || _resetting) return;
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: 'Resetear datos demo',
+      message: 'Esta acción borrará todos los datos demo. ¿Deseas continuar?',
+      confirmText: 'Borrar',
+    );
+    if (confirmed != true) return;
+    setState(() => _resetting = true);
+    try {
+      await _service.resetDemoData();
+      await _init();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('No se pudo resetear los datos demo. Intenta de nuevo.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _resetting = false);
     }
   }
 
@@ -112,9 +156,49 @@ class _FleetDashboardState extends State<FleetDashboard> {
       );
     }
 
+    if (_error != null) {
+      return DashboardScaffold(
+        title: 'Flota',
+        children: [
+          const SizedBox(height: 32),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_error!),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _init,
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
     return DashboardScaffold(
       title: 'Flota',
       children: [
+        if (AppConfig.isDemo)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: _resetting ? null : _resetDemo,
+              icon: _resetting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.restart_alt, color: Colors.red),
+              label: Text(
+                _resetting ? 'Borrando...' : 'Resetear datos demo',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+          ),
         Builder(builder: (context) {
           final daysOwed = _service.totalDaysOwed();
           final level = resolveAlertLevel(daysOwed: daysOwed);

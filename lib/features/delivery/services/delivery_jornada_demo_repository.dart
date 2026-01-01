@@ -28,6 +28,21 @@ class DeliveryJornadaDemoRepository implements DeliveryJornadaRepository {
         return 'prod_';
     }
   }
+  
+  @override
+  Future<void> resetDemoData() async {
+    if (!AppConfig.isDemo) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kJornadaKey);
+    await prefs.remove(_kDebtKey);
+    await prefs.remove(_kHistoryKey);
+    await prefs.remove(_kPaymentsKey);
+    _jornada = DeliveryJornada.todayNotStarted();
+    _debt = DeliveryDebt.empty();
+    _history.clear();
+    _payments.clear();
+    _loaded = false;
+  }
 
   String get _kJornadaKey => '${_envKeyPrefix}delivery_jornada';
   String get _kDebtKey => '${_envKeyPrefix}delivery_debt';

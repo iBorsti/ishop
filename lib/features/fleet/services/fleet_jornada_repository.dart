@@ -20,4 +20,5 @@ abstract class FleetJornadaRepository {
   void recordPayment({required double amount, required int bikesCovered});
   List<FleetPayment> getPaymentHistory();
   FleetWeeklySummary getWeeklySummary(DateTime date);
+  Future<void> resetDemoData();
 }

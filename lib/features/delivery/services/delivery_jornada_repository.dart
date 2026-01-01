@@ -14,4 +14,5 @@ abstract class DeliveryJornadaRepository {
   void markAsPaid();
   void recordPayment({required double amount, required int jornadasCovered});
   DeliveryWeeklySummary getWeeklySummary(DateTime date);
+  Future<void> resetDemoData();
 }

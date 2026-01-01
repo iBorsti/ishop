@@ -18,6 +18,8 @@ import 'models/delivery_weekly_summary.dart';
 import '../../core/utils/week_utils.dart';
 import 'services/delivery_jornada_repository.dart';
 import 'services/delivery_jornada_factory.dart';
+import '../../core/config/app_env.dart';
+import '../../core/widgets/confirm_dialog.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
   const DeliveryDashboard({super.key});
@@ -37,6 +39,7 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
   DeliveryWeeklySummary? _weeklySummary;
   DeliveryWeeklySummary? _prevWeeklySummary;
   String? _weekLabel;
+  bool _resetting = false;
 
   @override
   void initState() {
@@ -96,6 +99,33 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
     await _loadWeeklySummary();
   }
 
+  Future<void> _resetDemo() async {
+    if (!AppConfig.isDemo || _resetting) return;
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: 'Resetear datos demo',
+      message: 'Esta acción borrará todos los datos demo. ¿Deseas continuar?',
+      confirmText: 'Borrar',
+    );
+    if (confirmed != true) return;
+    setState(() => _resetting = true);
+    try {
+      await _jornadaService.resetDemoData();
+      await _load();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('No se pudo resetear los datos demo. Intenta de nuevo.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _resetting = false);
+    }
+  }
+
   String _alertMessage(int days, AlertLevel level) {
     if (days <= 0) return '';
     switch (level) {
@@ -114,6 +144,38 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return const DashboardScaffold(
+        title: 'Delivery',
+        children: [
+          SizedBox(height: 32),
+          Center(child: CircularProgressIndicator()),
+        ],
+      );
+    }
+
+    if (error != null) {
+      return DashboardScaffold(
+        title: 'Delivery',
+        children: [
+          const SizedBox(height: 32),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('No se pudieron cargar los datos'),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _load,
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
     final available = ref.watch(availabilityProvider);
     final level = resolveAlertLevel(daysOwed: _daysOwed);
     final message = _alertMessage(_daysOwed, level);
@@ -122,6 +184,24 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
     return DashboardScaffold(
       title: 'Delivery',
       children: [
+        if (AppConfig.isDemo)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: _resetting ? null : _resetDemo,
+              icon: _resetting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.restart_alt, color: Colors.red),
+              label: Text(
+                _resetting ? 'Borrando...' : 'Resetear datos demo',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+          ),
         if (!_alertLoading)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),

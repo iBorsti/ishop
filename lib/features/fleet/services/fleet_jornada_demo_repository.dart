@@ -215,6 +215,21 @@ class FleetJornadaDemoRepository implements FleetJornadaRepository {
   }
 
   @override
+  Future<void> resetDemoData() async {
+    if (!AppConfig.isDemo) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kJornadasKey);
+    await prefs.remove(_kDebtsKey);
+    await prefs.remove(_kHistoryKey);
+    await prefs.remove(_kPaymentsKey);
+    _jornadas.clear();
+    _debts.clear();
+    _history.clear();
+    _payments.clear();
+    _loaded = false;
+  }
+
+  @override
   FleetFinancialSummary getFinancialSummary() {
     final closed = _totalClosedJornadas();
     final expected = closed * dailyFee;

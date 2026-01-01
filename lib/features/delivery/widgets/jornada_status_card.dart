@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../state/delivery_jornada_controller.dart';
 import '../models/delivery_jornada.dart';
-import '../services/delivery_jornada_repository.dart';
 import '../services/delivery_jornada_factory.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/alerts/alert_utils.dart';
@@ -125,6 +124,16 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                       try {
                         _controller.closeJornada(paid: false);
                         widget.onChanged?.call();
+                      } catch (_) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'No se pudo cerrar la jornada. Intenta de nuevo.',
+                            ),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
                       } finally {
                         if (mounted) setState(() => _actionLoading = false);
                       }
@@ -164,6 +173,16 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                         try {
                           _controller.markAsPaid();
                           widget.onChanged?.call();
+                        } catch (_) {
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'No se pudo registrar el pago. Intenta de nuevo.',
+                              ),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
                         } finally {
                           if (mounted) setState(() => _actionLoading = false);
                         }

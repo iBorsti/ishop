@@ -145,6 +145,16 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                         _controller.closeJornada(paid: false);
                         _showMessage('Jornada cerrada para ${widget.moto['id']}');
                         widget.onChanged();
+                      } catch (_) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'No se pudo cerrar la jornada de la moto. Intenta de nuevo.',
+                            ),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
                       } finally {
                         if (mounted) setState(() => _actionLoading = false);
                       }
@@ -185,6 +195,16 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                           _controller.markAsPaid();
                           _showMessage('Cuota pagada para ${widget.moto['id']}');
                           widget.onChanged();
+                        } catch (_) {
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'No se pudo registrar el pago de la moto. Intenta de nuevo.',
+                              ),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
                         } finally {
                           if (mounted) setState(() => _actionLoading = false);
                         }

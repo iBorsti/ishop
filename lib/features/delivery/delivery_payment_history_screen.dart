@@ -116,11 +116,26 @@ class _DeliveryPaymentHistoryScreenState
                             saving = true;
                           });
 
-                          _service.recordPayment(
-                            amount: amount,
-                            jornadasCovered: jornadas,
-                          );
-                          Navigator.of(ctx).pop(true);
+                          try {
+                            _service.recordPayment(
+                              amount: amount,
+                              jornadasCovered: jornadas,
+                            );
+                            Navigator.of(ctx).pop(true);
+                          } catch (_) {
+                            if (!mounted) return;
+                            setInnerState(() {
+                              saving = false;
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'No se pudo guardar el pago. Intenta de nuevo.',
+                                ),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
                         },
                   icon: saving
                       ? const SizedBox(
