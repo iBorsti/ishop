@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../models/product.dart';
-import '../models/delivery_option.dart';
 
 class OrderConfirmationScreen extends StatelessWidget {
   final Product product;
-  final DeliveryOption delivery;
 
   const OrderConfirmationScreen({
     super.key,
     required this.product,
-    required this.delivery,
   });
 
   @override
   Widget build(BuildContext context) {
-    final total = product.price + delivery.price;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Pedido confirmado')),
       body: Padding(
@@ -42,7 +37,7 @@ class OrderConfirmationScreen extends StatelessWidget {
             const SizedBox(height: 16),
             const Center(
               child: Text(
-                '¡Pedido en camino!',
+                '¡Pedido enviado a repartidores!',
                 style: TextStyle(
                   color: AppColors.navy,
                   fontWeight: FontWeight.w700,
@@ -53,7 +48,7 @@ class OrderConfirmationScreen extends StatelessWidget {
             const SizedBox(height: 6),
             const Center(
               child: Text(
-                'Hemos asignado tu delivery. Puedes revisar el estado desde inicio.',
+                'Los repartidores cercanos reciben tu pedido y podrán aceptarlo. Te avisaremos cuando uno lo tome.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.textGray),
               ),
@@ -75,24 +70,18 @@ class OrderConfirmationScreen extends StatelessWidget {
                     value: product.name,
                   ),
                   const SizedBox(height: 8),
-                  _SummaryRow(
-                    label: 'Delivery',
-                    value: '${delivery.name} · ETA ${delivery.etaMinutes} min',
+                  const _SummaryRow(
+                    label: 'Estado',
+                    value: 'Esperando aceptación de un delivery',
+                    valueStyle: TextStyle(
+                      color: AppColors.navy,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  _SummaryRow(
+                  const _SummaryRow(
                     label: 'Envío',
-                    value: 'C\$ ${delivery.price.toStringAsFixed(0)}',
-                  ),
-                  const Divider(height: 22),
-                  _SummaryRow(
-                    label: 'Total a pagar',
-                    value: 'C\$ ${total.toStringAsFixed(0)}',
-                    valueStyle: const TextStyle(
-                      color: AppColors.navy,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
-                    ),
+                    value: 'Se confirmará cuando un delivery acepte',
                   ),
                 ],
               ),

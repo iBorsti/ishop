@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/product.dart';
-import 'select_delivery_screen.dart';
+import 'order_confirmation_screen.dart';
 
 class ProductDetailScreen extends StatelessWidget {
   final Product product;
@@ -55,7 +55,7 @@ class ProductDetailScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => SelectDeliveryScreen(product: product),
+                          builder: (_) => OrderConfirmationScreen(product: product),
                         ),
                       );
                     },
