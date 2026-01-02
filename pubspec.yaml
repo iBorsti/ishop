@@ -40,6 +40,7 @@ dependencies:
   uuid: ^3.0.7
   image_picker: ^0.8.7
   fl_chart: ^0.60.0
+  path_provider: ^2.0.14
 
 dev_dependencies:
   flutter_test:

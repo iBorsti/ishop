@@ -4,8 +4,9 @@ import '../../../core/auth/state/auth_controller.dart';
 import '../../../core/auth/models/seller_profile.dart';
 import '../services/seller_metrics_service.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/services.dart';
 import 'seller_profile_screen.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class SellerDashboardScreen extends StatefulWidget {
   const SellerDashboardScreen({super.key});
@@ -123,9 +124,22 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
               if (uid == null) return;
               final messenger = ScaffoldMessenger.of(context);
               final csv = await SellerMetricsService.exportCsv(uid, _range.start, _range.end);
-              await Clipboard.setData(ClipboardData(text: csv));
-              if (!mounted) return;
-              messenger.showSnackBar(const SnackBar(content: Text('CSV copiado al portapapeles')));
+              try {
+                Directory? dir;
+                try {
+                  dir = await getDownloadsDirectory();
+                } catch (_) {
+                  dir = null;
+                }
+                dir ??= await getApplicationDocumentsDirectory();
+                final file = File('${dir.path}/merca_nica_sales_${uid}_${DateTime.now().millisecondsSinceEpoch}.csv');
+                await file.writeAsString(csv);
+                if (!mounted) return;
+                messenger.showSnackBar(SnackBar(content: Text('CSV guardado: ${file.path}')));
+              } catch (e) {
+                if (!mounted) return;
+                messenger.showSnackBar(SnackBar(content: Text('Error guardando CSV: $e')));
+              }
             },
           ),
           IconButton(
