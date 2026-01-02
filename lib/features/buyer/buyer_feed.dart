@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'services/buyer_service.dart';
 import 'services/buyer_highlight_service.dart';
 import '../seller/services/seller_post_service.dart';
+import '../../core/theme/app_colors.dart';
 import 'widgets/product_card.dart';
 
 class BuyerFeed extends StatelessWidget {
@@ -88,7 +89,7 @@ class _SectionTitle extends StatelessWidget {
     final theme = Theme.of(context);
     return Text(
       text,
-      style: theme.textTheme.titleMedium,
+      style: theme.textTheme.titleMedium?.copyWith(color: AppColors.navy),
     );
   }
 }
@@ -163,7 +164,7 @@ class _HighlightCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: scheme.secondaryContainer.withValues(alpha: 0.35),
+      color: AppColors.cardWhite,
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -175,12 +176,12 @@ class _HighlightCard extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: scheme.primary.withValues(alpha: 0.08),
+                    color: AppColors.turquoise.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.local_offer_outlined,
-                    color: scheme.primary,
+                    color: AppColors.turquoise,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -190,7 +191,8 @@ class _HighlightCard extends StatelessWidget {
                     children: [
                       Text(
                         highlight.sellerName,
-                        style: theme.textTheme.titleMedium,
+                        style: theme.textTheme.titleMedium
+                            ?.copyWith(color: AppColors.navy),
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
@@ -205,13 +207,13 @@ class _HighlightCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: scheme.secondary.withValues(alpha: 0.12),
+                    color: AppColors.warningYellow,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     'Descuento',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.secondary,
+                      color: AppColors.navy,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -221,7 +223,8 @@ class _HighlightCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               highlight.description,
-              style: theme.textTheme.bodyLarge,
+              style:
+                  theme.textTheme.bodyLarge?.copyWith(color: AppColors.navy),
             ),
           ],
         ),

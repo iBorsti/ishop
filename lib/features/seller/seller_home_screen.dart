@@ -7,6 +7,7 @@ import '../../core/config/app_env.dart';
 import '../../core/auth/widgets/logout_button.dart';
 import '../../core/auth/widgets/role_guard.dart';
 import '../../core/widgets/confirm_dialog.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/seller_post.dart';
 import 'services/seller_post_service.dart';
@@ -197,7 +198,13 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = AuthController.instance.user;
     final name = user?.name ?? 'Mi negocio';
+    final closed = !open;
+    final headerBg = closed
+        ? AppColors.coral.withAlpha(16)
+        : Colors.white;
+    final headerText = closed ? Colors.white : AppColors.navy;
     return Card(
+      color: headerBg,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -207,10 +214,15 @@ class _Header extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color:
+                    closed ? AppColors.coral.withAlpha(32) : Colors.grey.shade200,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.storefront, size: 30),
+              child: Icon(
+                Icons.storefront,
+                size: 30,
+                color: closed ? Colors.white : AppColors.navy,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -219,27 +231,37 @@ class _Header extends StatelessWidget {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: headerText,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text('Categoría: Comida'),
+                  Text(
+                    'Categoría: Comida',
+                    style: TextStyle(color: closed ? Colors.white70 : AppColors.textGray),
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Icon(
                         Icons.circle,
-                        color: open ? Colors.green : Colors.red,
+                        color: open ? AppColors.turquoise : AppColors.coral,
                         size: 10,
                       ),
                       const SizedBox(width: 6),
-                      Text(open ? 'Abierto' : 'Cerrado'),
+                      Text(
+                        open ? 'Abierto' : 'Cerrado',
+                        style: TextStyle(color: headerText),
+                      ),
                       const SizedBox(width: 12),
                       Switch(
                         value: open,
                         onChanged: onToggleOpen,
+                        activeColor: AppColors.turquoise,
+                        inactiveTrackColor: AppColors.coral.withAlpha(120),
+                        inactiveThumbColor: AppColors.coral,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ],
@@ -272,6 +294,10 @@ class _QuickActions extends StatelessWidget {
             onPressed: onProduct,
             icon: const Icon(Icons.add_box),
             label: const Text('Publicar producto'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.turquoise,
+              foregroundColor: Colors.white,
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -280,6 +306,10 @@ class _QuickActions extends StatelessWidget {
             onPressed: onDiscount,
             icon: const Icon(Icons.local_offer),
             label: const Text('Publicar descuento'),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.turquoise),
+              foregroundColor: AppColors.turquoise,
+            ),
           ),
         ),
       ],
@@ -322,11 +352,15 @@ class _Metric extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.grey)),
+        Text(label, style: const TextStyle(color: AppColors.textGray)),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
         ),
       ],
     );
@@ -347,9 +381,9 @@ class _SellerPostCard extends StatelessWidget {
   Color _badgeColor() {
     switch (post.type) {
       case SellerPostType.product:
-        return Colors.amber.shade200;
+        return AppColors.turquoise.withAlpha(36);
       case SellerPostType.discount:
-        return Colors.blue.shade200;
+        return AppColors.warningYellow.withAlpha(70);
     }
   }
 
@@ -398,7 +432,10 @@ class _SellerPostCard extends StatelessWidget {
                           color: _badgeColor(),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(_badgeText()),
+                        child: Text(
+                          _badgeText(),
+                          style: const TextStyle(color: AppColors.navy),
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -406,14 +443,18 @@ class _SellerPostCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: AppColors.navy,
                         ),
                       ),
                       const SizedBox(height: 4),
                       if (post.type == SellerPostType.product && post.price != null)
-                        Text('C\$ ${post.price!.toStringAsFixed(0)}'),
+                        Text(
+                          'C\$ ${post.price!.toStringAsFixed(0)}',
+                          style: const TextStyle(color: AppColors.navy),
+                        ),
                       Text(
                         'Publicado: ${df.format(post.createdAt)}',
-                        style: const TextStyle(color: Colors.grey),
+                        style: const TextStyle(color: AppColors.textGray),
                       ),
                     ],
                   ),
@@ -431,8 +472,11 @@ class _SellerPostCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: onDelete,
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  label: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+                  icon: const Icon(Icons.delete, color: AppColors.coral),
+                  label: const Text(
+                    'Eliminar',
+                    style: TextStyle(color: AppColors.coral),
+                  ),
                 ),
               ],
             ),

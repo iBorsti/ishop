@@ -20,6 +20,7 @@ import 'services/delivery_jornada_repository.dart';
 import 'services/delivery_jornada_factory.dart';
 import '../../core/config/app_env.dart';
 import '../../core/widgets/confirm_dialog.dart';
+import '../../core/theme/app_colors.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
   const DeliveryDashboard({super.key});
@@ -247,7 +248,10 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
             },
             icon: const Icon(Icons.payments_outlined),
             label: const Text('Pagos'),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.successGreen,
+              foregroundColor: Colors.white,
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -273,7 +277,7 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
                 ),
                 decoration: BoxDecoration(
                   color: available
-                      ? Colors.green.withAlpha(40)
+                      ? AppColors.turquoise.withAlpha(40)
                       : Colors.grey.withAlpha(30),
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -284,7 +288,8 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
                       duration: const Duration(milliseconds: 300),
                       child: Icon(
                         available ? Icons.check_circle : Icons.pause_circle,
-                        color: available ? Colors.green : Colors.grey,
+                        color:
+                            available ? AppColors.turquoise : Colors.grey,
                         size: 18,
                       ),
                     ),
@@ -292,7 +297,9 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
                     Text(
                       available ? 'Disponible' : 'No disponible',
                       style: TextStyle(
-                        color: available ? Colors.green[800] : Colors.grey[700],
+                        color: available
+                            ? AppColors.navy
+                            : Colors.grey[700],
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -310,7 +317,7 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
                     ref.read(availabilityProvider.notifier).toggle(),
                 icon: Icon(
                   available ? Icons.toggle_on : Icons.toggle_off,
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.turquoise,
                 ),
                 label: Text(available ? 'Desactivar' : 'Activar'),
               ),

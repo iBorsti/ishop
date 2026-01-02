@@ -44,22 +44,22 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
   Color _statusColor(JornadaStatus status, bool paid) {
     switch (status) {
       case JornadaStatus.notStarted:
-        return Colors.amber;
+        return AppColors.textGray;
       case JornadaStatus.active:
-        return Colors.blue;
+        return AppColors.turquoise;
       case JornadaStatus.closed:
-        return paid ? Colors.green : Colors.orange;
+        return paid ? AppColors.successGreen : AppColors.coral;
     }
   }
 
   Color _alertColor(AlertLevel level) {
     switch (level) {
       case AlertLevel.critical:
-        return Colors.red;
+        return AppColors.coral;
       case AlertLevel.warning:
-        return Colors.deepOrange;
+        return AppColors.warningYellow;
       case AlertLevel.info:
-        return Colors.orange;
+        return AppColors.turquoise;
       case AlertLevel.none:
         return Colors.transparent;
     }
@@ -99,7 +99,8 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                 widget.onChanged?.call();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
+                backgroundColor: AppColors.turquoise,
+                foregroundColor: Colors.white,
               ),
               child: const Text('Iniciar jornada'),
             );
@@ -107,7 +108,7 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
           case JornadaStatus.active:
             title = 'Jornada en curso';
             subtitle =
-              'Cuota del día: C\$${jornada.dailyFee} • Estado: Pendiente';
+                'Cuota del día: C\$${jornada.dailyFee} • Estado: Pendiente';
             actionButton = ElevatedButton(
               onPressed: _actionLoading
                   ? null
@@ -140,7 +141,8 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                       }
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
+                backgroundColor: AppColors.turquoise,
+                foregroundColor: Colors.white,
               ),
               child: _actionLoading
                   ? const SizedBox(
@@ -190,7 +192,8 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
+                  backgroundColor: AppColors.successGreen,
+                  foregroundColor: Colors.white,
                 ),
                 child: _actionLoading
                     ? const SizedBox(
@@ -222,9 +225,9 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.withAlpha(25),
+                      color: AppColors.coral.withAlpha(20),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.red.withAlpha(80)),
+                      border: Border.all(color: AppColors.coral.withAlpha(140)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,7 +236,7 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                           children: const [
                             Icon(
                               Icons.warning_amber_rounded,
-                              color: Colors.red,
+                              color: AppColors.coral,
                               size: 20,
                             ),
                             SizedBox(width: 8),
@@ -241,14 +244,20 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                               'Deuda pendiente',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.red,
+                                color: AppColors.coral,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 6),
-                        Text('Días adeudados: ${debt.daysOwed}'),
-                        Text('Total: C\$${debt.totalAmount}'),
+                        Text(
+                          'Días adeudados: ${debt.daysOwed}',
+                          style: const TextStyle(color: AppColors.navy),
+                        ),
+                        Text(
+                          'Total: C\$${debt.totalAmount}',
+                          style: const TextStyle(color: AppColors.navy),
+                        ),
                       ],
                     ),
                   ),
@@ -267,7 +276,10 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                     const SizedBox(width: 8),
                     Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.navy,
+                      ),
                     ),
                     if (alertLevel != AlertLevel.none) ...[
                       const SizedBox(width: 8),
@@ -280,7 +292,10 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(subtitle),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: AppColors.textGray),
+                ),
                 const SizedBox(height: 12),
                 actionButton,
               ],

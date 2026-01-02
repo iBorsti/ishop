@@ -21,7 +21,7 @@ class DeliveryStatSection extends StatelessWidget {
           title: 'Carreras',
           value: '${data?['carreras'] ?? 0}',
           icon: Icons.motorcycle,
-          backgroundColor: AppColors.primaryBlue,
+          backgroundColor: AppColors.turquoise,
         ),
         StatCard(
           title: 'Ingresos',
@@ -39,7 +39,7 @@ class DeliveryStatSection extends StatelessWidget {
           title: 'Tiempo activo',
           value: '${data?['tiempoActivo'] ?? '-'}',
           icon: Icons.access_time,
-          backgroundColor: AppColors.warningOrange,
+          backgroundColor: AppColors.warningYellow,
         ),
       ],
     );

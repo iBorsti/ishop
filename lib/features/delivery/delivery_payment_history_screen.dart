@@ -5,6 +5,7 @@ import 'models/delivery_payment.dart';
 import 'services/delivery_jornada_repository.dart';
 import 'services/delivery_jornada_factory.dart';
 import '../../core/widgets/confirm_dialog.dart';
+import '../../core/theme/app_colors.dart';
 
 class DeliveryPaymentHistoryScreen extends StatefulWidget {
   const DeliveryPaymentHistoryScreen({super.key});
@@ -171,7 +172,7 @@ class _DeliveryPaymentHistoryScreenState
         onPressed: _addPaymentDialog,
         icon: const Icon(Icons.add_card),
         label: const Text('Registrar pago'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.successGreen,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -189,24 +190,35 @@ class _DeliveryPaymentHistoryScreenState
                       ),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: Colors.green.withAlpha(30),
-                          child: const Icon(Icons.credit_card, color: Colors.green),
+                          backgroundColor: AppColors.successGreen.withAlpha(30),
+                          child: const Icon(
+                            Icons.credit_card,
+                            color: AppColors.successGreen,
+                          ),
                         ),
                         title: Text(
                           'C\$${payment.amount.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: AppColors.navy,
                           ),
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(_dateFormat.format(payment.paidAt)),
+                            Text(
+                              _dateFormat.format(payment.paidAt),
+                              style: const TextStyle(color: AppColors.textGray),
+                            ),
                             Text(
                               'Jornadas cubiertas: ${payment.jornadasCovered}',
+                              style: const TextStyle(color: AppColors.textGray),
                             ),
-                            Text('Registrado por: ${payment.recordedBy}'),
+                            Text(
+                              'Registrado por: ${payment.recordedBy}',
+                              style: const TextStyle(color: AppColors.textGray),
+                            ),
                           ],
                         ),
                       ),

@@ -6,6 +6,7 @@ import '../../core/auth/state/auth_controller.dart';
 import '../../core/widgets/confirm_dialog.dart';
 import 'mandadito.dart';
 import 'mandadito_service.dart';
+import '../../core/theme/app_colors.dart';
 
 class DeliveryMandaditosListScreen extends StatefulWidget {
   const DeliveryMandaditosListScreen({super.key});
@@ -154,7 +155,7 @@ class _DeliveryMandaditosListScreenState
                         primaryActionLabel: 'Marcar como completado',
                         onPrimaryAction:
                             _completing ? null : () => _complete(item.id),
-                        actionColor: Colors.green,
+                        actionColor: AppColors.successGreen,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -167,7 +168,7 @@ class _DeliveryMandaditosListScreenState
                         item: item,
                         primaryActionLabel: 'Completado',
                         onPrimaryAction: null,
-                        actionColor: Colors.grey,
+                        actionColor: AppColors.successGreen,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -181,6 +182,7 @@ class _DeliveryMandaditosListScreenState
                         primaryActionLabel: 'Aceptar',
                         onPrimaryAction:
                             _taking ? null : () => _confirmAndTake(item.id),
+                        actionColor: AppColors.turquoise,
                       ),
                     ),
                   ],
@@ -210,7 +212,6 @@ class _MandaditoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -230,23 +231,25 @@ class _MandaditoCard extends StatelessWidget {
                 ),
                 _StatusPill(
                   label: item.urgent ? 'Urgente' : 'Normal',
-                  color: item.urgent ? Colors.orange.shade600 : scheme.primary,
-                    background: item.urgent
-                      ? Colors.orange.shade50
-                      : scheme.primary.withValues(alpha: 0.12),
+                  color: item.urgent
+                      ? AppColors.warningYellow
+                      : AppColors.turquoise,
+                  background: item.urgent
+                      ? AppColors.warningYellow.withAlpha(24)
+                      : AppColors.turquoise.withAlpha(18),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             _InfoRow(
               icon: Icons.place_outlined,
-              iconColor: scheme.primary,
+              iconColor: AppColors.turquoise,
               label: item.origin,
             ),
             const SizedBox(height: 6),
             _InfoRow(
               icon: Icons.flag_outlined,
-              iconColor: scheme.secondary,
+              iconColor: AppColors.secondaryBlue,
               label: item.destination,
             ),
             if (item.budget != null) ...[
@@ -259,13 +262,36 @@ class _MandaditoCard extends StatelessWidget {
             const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onPrimaryAction,
-                style: actionColor != null
-                    ? ElevatedButton.styleFrom(backgroundColor: actionColor)
-                    : null,
-                child: Text(primaryActionLabel),
-              ),
+              child: onPrimaryAction == null
+                  ? Container(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: AppColors.successGreen.withAlpha(18),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.check_circle, color: AppColors.successGreen),
+                          SizedBox(width: 8),
+                          Text(
+                            'Completado',
+                            style: TextStyle(color: AppColors.textGray),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: onPrimaryAction,
+                      style: actionColor != null
+                          ? ElevatedButton.styleFrom(
+                              backgroundColor: actionColor,
+                              foregroundColor: Colors.white,
+                            )
+                          : null,
+                      child: Text(primaryActionLabel),
+                    ),
             ),
           ],
         ),
@@ -312,17 +338,16 @@ class _InfoPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: scheme.primary.withValues(alpha: 0.06),
+        color: AppColors.turquoise.withAlpha(12),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: scheme.primary),
+          Icon(icon, size: 16, color: AppColors.turquoise),
           const SizedBox(width: 6),
           Text(text),
         ],
@@ -374,7 +399,6 @@ class _DeliverySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       child: Padding(
@@ -384,17 +408,17 @@ class _DeliverySummary extends StatelessWidget {
             _SummaryItem(
               label: 'Tomados',
               value: mineCount,
-              color: scheme.primary,
+              color: AppColors.turquoise,
             ),
             _SummaryItem(
               label: 'Abiertos',
               value: openCount,
-              color: scheme.secondary,
+              color: AppColors.secondaryBlue,
             ),
             _SummaryItem(
               label: 'Completados',
               value: completedCount,
-              color: Colors.grey.shade600,
+              color: AppColors.successGreen,
             ),
           ],
         ),
@@ -456,7 +480,7 @@ class _SectionTitle extends StatelessWidget {
     final theme = Theme.of(context);
     return Text(
       text,
-      style: theme.textTheme.titleMedium,
+      style: theme.textTheme.titleMedium?.copyWith(color: AppColors.navy),
     );
   }
 }

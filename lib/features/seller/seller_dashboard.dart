@@ -30,6 +30,7 @@ class SellerDashboard extends StatelessWidget {
                 title: 'Ventas hoy',
                 value: todaySales,
                 icon: Icons.local_mall,
+                backgroundColor: AppColors.turquoise,
               ),
             ),
             const SizedBox(width: 12),
@@ -38,6 +39,7 @@ class SellerDashboard extends StatelessWidget {
                 title: 'Ingresos mes',
                 value: monthIncome,
                 icon: Icons.attach_money,
+                backgroundColor: AppColors.successGreen,
               ),
             ),
           ],
@@ -47,6 +49,7 @@ class SellerDashboard extends StatelessWidget {
           title: 'Productos vendidos',
           value: productsSold,
           icon: Icons.inventory_2,
+          backgroundColor: AppColors.secondaryBlue,
         ),
         const SizedBox(height: 16),
         const DashboardSectionTitle('Gráficas'),
@@ -68,7 +71,7 @@ class SellerDashboard extends StatelessWidget {
                 Container(
                   height: 140,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue,
+                    color: AppColors.turquoise,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Padding(
@@ -108,7 +111,8 @@ class SellerDashboard extends StatelessWidget {
                           icon: const Icon(Icons.post_add),
                           label: const Text('Publicar producto'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryBlue,
+                            backgroundColor: AppColors.turquoise,
+                            foregroundColor: Colors.white,
                           ),
                         ),
                       ),
@@ -130,7 +134,8 @@ class SellerDashboard extends StatelessWidget {
                           icon: const Icon(Icons.bar_chart),
                           label: const Text('Ver reportes'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondaryBlue,
+                            backgroundColor: AppColors.successGreen,
+                            foregroundColor: Colors.white,
                           ),
                         ),
                       ),

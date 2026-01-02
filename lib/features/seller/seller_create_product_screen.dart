@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/auth/models/app_user.dart';
 import '../../core/auth/state/auth_controller.dart';
 import '../../core/auth/widgets/role_guard.dart';
+import '../../core/theme/app_colors.dart';
 import 'services/seller_post_service.dart';
 import 'models/seller_post.dart';
 
@@ -136,6 +137,11 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(isEdit ? 'Guardar cambios' : 'Publicar'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            isEdit ? AppColors.successGreen : AppColors.turquoise,
+                        foregroundColor: Colors.white,
+                      ),
                     ),
                   ),
                 ],

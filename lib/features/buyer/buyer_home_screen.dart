@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/auth/models/app_user.dart';
 import '../../core/auth/widgets/logout_button.dart';
 import '../../core/auth/widgets/role_guard.dart';
+import '../../core/theme/app_colors.dart';
 import 'buyer_feed.dart';
 import '../mandaditos/buyer_mandadito_create_screen.dart';
 import '../mandaditos/buyer_mandadito_list_screen.dart';
@@ -28,6 +29,7 @@ class BuyerHomeScreen extends StatelessWidget {
         ),
         body: const BuyerFeed(),
         floatingActionButton: FloatingActionButton.extended(
+          backgroundColor: AppColors.turquoise,
           onPressed: () {
             showModalBottomSheet(
               context: context,
