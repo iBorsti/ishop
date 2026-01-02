@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/auth/state/auth_controller.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/auth/services/auth_service.dart';
 import '../../../core/auth/models/app_user.dart';
 

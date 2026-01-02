@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/auth/models/app_user.dart';
 import '../../core/auth/state/auth_controller.dart';
 import '../../core/auth/widgets/role_guard.dart';
-import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme.dart';
 import 'services/seller_post_service.dart';
 import 'models/seller_post.dart';
 
@@ -107,6 +107,7 @@ class _SellerCreateDiscountScreenState
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _saving ? null : _submit,
+                      style: isEdit ? AppButtonStyles.success : null,
                       child: _saving
                           ? const SizedBox(
                               height: 18,
@@ -114,12 +115,6 @@ class _SellerCreateDiscountScreenState
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(isEdit ? 'Guardar cambios' : 'Publicar'),
-                      style: isEdit
-                          ? ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.successGreen,
-                              foregroundColor: Colors.white,
-                            )
-                          : null,
                     ),
                   ),
                 ],

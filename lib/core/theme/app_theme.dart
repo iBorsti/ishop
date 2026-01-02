@@ -115,3 +115,15 @@ class AppTheme {
     ),
   );
 }
+
+class AppButtonStyles {
+  static final ButtonStyle success = ButtonStyle(
+    backgroundColor: WidgetStatePropertyAll(AppColors.successGreen),
+    foregroundColor: const WidgetStatePropertyAll(Colors.white),
+  );
+
+  static final ButtonStyle danger = ButtonStyle(
+    backgroundColor: WidgetStatePropertyAll(AppColors.coral),
+    foregroundColor: const WidgetStatePropertyAll(Colors.white),
+  );
+}

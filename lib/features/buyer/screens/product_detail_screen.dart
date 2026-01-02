@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 import '../models/product.dart';
 import 'select_delivery_screen.dart';
 
@@ -58,13 +59,9 @@ class ProductDetailScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.successGreen,
-                    ),
-                    child: Text(
-                      'Comprar • C\$ ${product.price.toStringAsFixed(0)}',
-                      style: const TextStyle(color: Colors.white),
-                    ),
+                    style: AppButtonStyles.success,
+                    child:
+                        Text('Comprar • C\$ ${product.price.toStringAsFixed(0)}'),
                   ),
                 ),
               ],

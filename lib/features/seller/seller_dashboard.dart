@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/widgets/stat_card.dart';
 import '../../core/widgets/simple_line_chart.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme.dart';
 import 'publish_product_screen.dart';
 import 'seller_reports_screen.dart';
 import 'seller_history_screen.dart';
@@ -129,10 +130,7 @@ class SellerDashboard extends StatelessWidget {
                           },
                           icon: const Icon(Icons.bar_chart),
                           label: const Text('Ver reportes'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.successGreen,
-                            foregroundColor: Colors.white,
-                          ),
+                          style: AppButtonStyles.success,
                         ),
                       ),
                     ),

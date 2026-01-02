@@ -4,6 +4,7 @@ import '../state/delivery_jornada_controller.dart';
 import '../models/delivery_jornada.dart';
 import '../services/delivery_jornada_factory.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/alerts/alert_utils.dart';
 import '../../../core/alerts/models/alert_level.dart';
 import '../../../core/widgets/confirm_dialog.dart';
@@ -191,10 +192,7 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                           if (mounted) setState(() => _actionLoading = false);
                         }
                       },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.successGreen,
-                  foregroundColor: Colors.white,
-                ),
+                style: AppButtonStyles.success,
                 child: _actionLoading
                     ? const SizedBox(
                         width: 16,

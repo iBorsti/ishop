@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 import '../models/product.dart';
 import '../services/delivery_selector_service.dart';
 import '../widgets/delivery_option_card.dart';
@@ -87,11 +88,19 @@ class _SelectDeliveryScreenState extends State<SelectDeliveryScreen> {
                           ),
                         );
                       },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.successGreen,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: AppColors.textGray.withValues(alpha: 0.16),
-                  disabledForegroundColor: AppColors.textGray,
+                style: AppButtonStyles.success.copyWith(
+                  backgroundColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.disabled)) {
+                      return AppColors.textGray.withValues(alpha: 0.16);
+                    }
+                    return AppColors.successGreen;
+                  }),
+                  foregroundColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.disabled)) {
+                      return AppColors.textGray;
+                    }
+                    return Colors.white;
+                  }),
                 ),
                 child: const Text('Confirmar delivery'),
               ),

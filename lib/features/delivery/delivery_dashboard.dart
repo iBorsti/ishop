@@ -21,6 +21,7 @@ import 'services/delivery_jornada_factory.dart';
 import '../../core/config/app_env.dart';
 import '../../core/widgets/confirm_dialog.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
   const DeliveryDashboard({super.key});
@@ -248,10 +249,7 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
             },
             icon: const Icon(Icons.payments_outlined),
             label: const Text('Pagos'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.successGreen,
-              foregroundColor: Colors.white,
-            ),
+            style: AppButtonStyles.success,
           ),
         ),
         const SizedBox(height: 16),
