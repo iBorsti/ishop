@@ -259,9 +259,16 @@ class _Header extends StatelessWidget {
                       Switch(
                         value: open,
                         onChanged: onToggleOpen,
-                        activeColor: AppColors.turquoise,
-                        inactiveTrackColor: AppColors.coral.withAlpha(120),
-                        inactiveThumbColor: AppColors.coral,
+                        thumbColor: WidgetStateProperty.resolveWith(
+                          (states) => states.contains(WidgetState.selected)
+                              ? AppColors.turquoise
+                              : AppColors.coral,
+                        ),
+                        trackColor: WidgetStateProperty.resolveWith(
+                          (states) => states.contains(WidgetState.selected)
+                              ? AppColors.turquoise.withAlpha(80)
+                              : AppColors.coral.withAlpha(120),
+                        ),
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ],

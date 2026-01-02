@@ -160,7 +160,6 @@ class _HighlightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
 
     return Card(
       elevation: 0,
