@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 import 'product_price_chip.dart';
 import '../screens/product_detail_screen.dart';
+import '../screens/order_confirmation_screen.dart';
+import '../../buyer/services/cart_service.dart';
+import '../screens/cart_screen.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -79,11 +82,40 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      TextButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.shopping_bag_outlined),
-                        label: const Text('Comprar'),
-                      ),
+                          TextButton.icon(
+                            onPressed: () {
+                              CartService.instance.addItem(id: product.id, name: product.name, price: product.price.toDouble());
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Añadido al carrito'),
+                                  action: SnackBarAction(
+                                    label: 'Ver carrito',
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const CartScreen()),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.add_shopping_cart_outlined),
+                            label: const Text('Añadir'),
+                          ),
+                          const SizedBox(width: 6),
+                          TextButton.icon(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => OrderConfirmationScreen(product: product),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.shopping_bag_outlined),
+                            label: const Text('Comprar'),
+                          ),
                       const SizedBox(width: 8),
                       TextButton.icon(
                         onPressed: () {},
