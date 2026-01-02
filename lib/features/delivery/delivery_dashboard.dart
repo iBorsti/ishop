@@ -22,6 +22,8 @@ import '../../core/config/app_env.dart';
 import '../../core/widgets/confirm_dialog.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/metrics/metrics_service.dart';
+import '../../core/auth/state/auth_controller.dart';
 
 class DeliveryDashboard extends ConsumerStatefulWidget {
   const DeliveryDashboard({super.key});
@@ -234,6 +236,30 @@ class _DeliveryDashboardState extends ConsumerState<DeliveryDashboard> {
                   : null,
             ),
           ),
+        const SizedBox(height: 12),
+        const DashboardSectionTitle('Métricas'),
+        SizedBox(
+          height: 120,
+          child: FutureBuilder<Map<DateTime, double>>(
+            future: MetricsService.dailyTotals('delivery', AuthController.instance.user?.id ?? '', DateTime.now().subtract(const Duration(days: 6)), DateTime.now()),
+            builder: (ctx, snap) {
+              if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+              final data = snap.data!;
+              final total = data.values.fold<double>(0, (p, e) => p + e);
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Ingresos (7d)', style: Theme.of(context).textTheme.bodySmall), const SizedBox(height:8), Text('C\$${total.toStringAsFixed(0)}', style: Theme.of(context).textTheme.titleLarge)])),
+                      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Promedio diario', style: Theme.of(context).textTheme.bodySmall), const SizedBox(height:8), Text('C\$${(data.values.isEmpty?0:(data.values.fold<double>(0,(p,e)=>p+e)/data.length)).toStringAsFixed(0)}')])),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
         JornadaStatusCard(onChanged: _refreshAlerts),
         const SizedBox(height: 8),
         Align(

@@ -20,6 +20,8 @@ import '../../core/config/app_env.dart';
 import '../../core/widgets/confirm_dialog.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/auth/state/auth_controller.dart';
+import '../../core/metrics/metrics_service.dart';
 
 class FleetDashboard extends StatefulWidget {
   const FleetDashboard({super.key});
@@ -195,6 +197,22 @@ class _FleetDashboardState extends State<FleetDashboard> {
     return DashboardScaffold(
       title: 'Flota',
       children: [
+        const DashboardSectionTitle('Métricas'),
+        SizedBox(
+          height: 160,
+          child: FutureBuilder<Map<DateTime, double>>(
+            future: MetricsService.dailyTotals('fleet', AuthController.instance.user?.id ?? '', DateTime.now().subtract(const Duration(days: 6)), DateTime.now()),
+            builder: (ctx, snap) {
+              if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+              final data = snap.data ?? {};
+              final entries = data.entries.toList();
+              return ListView(
+                scrollDirection: Axis.horizontal,
+                children: entries.map((e) => Card(margin: const EdgeInsets.all(8), child: Padding(padding: const EdgeInsets.all(12), child: Column(children: [Text('${e.key.day}/${e.key.month}'), const SizedBox(height:8), Text('C\$${e.value.toStringAsFixed(0)}')] )))).toList(),
+              );
+            },
+          ),
+        ),
         if (AppConfig.isDemo)
           Align(
             alignment: Alignment.centerLeft,
