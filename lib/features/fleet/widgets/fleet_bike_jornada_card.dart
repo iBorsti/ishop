@@ -61,22 +61,22 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
   Color _statusColor(FleetJornadaStatus status, bool paid) {
     switch (status) {
       case FleetJornadaStatus.notStarted:
-        return Colors.amber;
+        return AppColors.warningYellow; // pendiente/inactivo
       case FleetJornadaStatus.active:
-        return Colors.blue;
+        return AppColors.turquoise; // en curso
       case FleetJornadaStatus.closed:
-        return paid ? Colors.green : Colors.orange;
+        return paid ? AppColors.successGreen : AppColors.coral;
     }
   }
 
   Color _alertColor(AlertLevel level) {
     switch (level) {
       case AlertLevel.critical:
-        return Colors.red;
+        return AppColors.coral;
       case AlertLevel.warning:
-        return Colors.deepOrange;
+        return AppColors.warningYellow;
       case AlertLevel.info:
-        return Colors.orange;
+        return AppColors.turquoise;
       case AlertLevel.none:
         return Colors.transparent;
     }
@@ -120,7 +120,8 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                 widget.onChanged();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
+                backgroundColor: AppColors.turquoise,
+                foregroundColor: Colors.white,
               ),
               child: const Text('Iniciar jornada'),
             );
@@ -161,7 +162,8 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                       }
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
+                backgroundColor: AppColors.turquoise,
+                foregroundColor: Colors.white,
               ),
               child: _actionLoading
                   ? const SizedBox(
@@ -212,7 +214,8 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
+                    backgroundColor: AppColors.successGreen,
+                    foregroundColor: Colors.white,
                 ),
                 child: _actionLoading
                     ? const SizedBox(
@@ -249,10 +252,16 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                     Expanded(
                       child: Text(
                         '${widget.moto['id']} • $alias',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navy,
+                        ),
                       ),
                     ),
-                    Text(driver, style: const TextStyle(color: Colors.black54)),
+                    Text(
+                      driver,
+                      style: const TextStyle(color: AppColors.textGray),
+                    ),
                     if (alertLevel != AlertLevel.none) ...[
                       const SizedBox(width: 8),
                       Tooltip(
@@ -268,18 +277,27 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(title),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.navy,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(subtitle, style: const TextStyle(color: Colors.black54)),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: AppColors.textGray),
+                ),
                 const SizedBox(height: 12),
                 if (debt.totalAmount > 0) ...[
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.withAlpha(25),
+                      color: AppColors.coral.withAlpha(20),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.red.withAlpha(80)),
+                      border: Border.all(color: AppColors.coral.withAlpha(120)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,7 +306,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                           children: const [
                             Icon(
                               Icons.warning_amber_rounded,
-                              color: Colors.red,
+                              color: AppColors.coral,
                               size: 18,
                             ),
                             SizedBox(width: 8),
@@ -296,14 +314,20 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                               'Deuda pendiente',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: Colors.red,
+                                color: AppColors.coral,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text('Días adeudados: ${debt.daysOwed}'),
-                        Text('Total: C\$${debt.totalAmount}'),
+                        Text(
+                          'Días adeudados: ${debt.daysOwed}',
+                          style: const TextStyle(color: AppColors.navy),
+                        ),
+                        Text(
+                          'Total: C\$${debt.totalAmount}',
+                          style: const TextStyle(color: AppColors.navy),
+                        ),
                       ],
                     ),
                   ),
@@ -387,7 +411,7 @@ class _FleetBikeJornadaListState extends State<FleetBikeJornadaList> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Card(
-          color: Colors.blueGrey[50],
+          color: AppColors.background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -401,17 +425,29 @@ class _FleetBikeJornadaListState extends State<FleetBikeJornadaList> {
                   children: [
                     const Text(
                       'Resumen de jornadas',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.navy,
+                      ),
                     ),
                     const SizedBox(height: 4),
-                    Text('Motos: $bikes'),
+                    Text(
+                      'Motos: $bikes',
+                      style: const TextStyle(color: AppColors.textGray),
+                    ),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Días adeudados: $daysOwed'),
-                    Text('Deuda total: C\$$totalDebt'),
+                    Text(
+                      'Días adeudados: $daysOwed',
+                      style: const TextStyle(color: AppColors.warningYellow),
+                    ),
+                    Text(
+                      'Deuda total: C\$$totalDebt',
+                      style: const TextStyle(color: AppColors.coral),
+                    ),
                   ],
                 ),
               ],

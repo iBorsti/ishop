@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/stat_card.dart';
+import '../../../core/theme/app_colors.dart';
 import '../models/admin_overview.dart';
 
 class AdminStatSection extends StatelessWidget {
@@ -19,6 +20,7 @@ class AdminStatSection extends StatelessWidget {
             title: 'Usuarios activos',
             value: overview.activeUsers.toString(),
             icon: Icons.people,
+            backgroundColor: AppColors.info,
           ),
         ),
         SizedBox(
@@ -27,6 +29,7 @@ class AdminStatSection extends StatelessWidget {
             title: 'Órdenes hoy',
             value: overview.ordersToday.toString(),
             icon: Icons.shopping_cart,
+            backgroundColor: AppColors.turquoise,
           ),
         ),
         SizedBox(
@@ -35,6 +38,7 @@ class AdminStatSection extends StatelessWidget {
             title: 'Deliveries activos',
             value: overview.activeDeliveries.toString(),
             icon: Icons.local_shipping,
+            backgroundColor: AppColors.warningYellow,
           ),
         ),
         SizedBox(
@@ -43,6 +47,7 @@ class AdminStatSection extends StatelessWidget {
             title: 'Ingresos estimados',
             value: '\$${overview.estimatedRevenue.toStringAsFixed(2)}',
             icon: Icons.attach_money,
+            backgroundColor: AppColors.successGreen,
           ),
         ),
       ],

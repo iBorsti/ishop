@@ -18,6 +18,7 @@ import 'models/fleet_weekly_summary.dart';
 import '../../core/utils/week_utils.dart';
 import '../../core/config/app_env.dart';
 import '../../core/widgets/confirm_dialog.dart';
+import '../../core/theme/app_colors.dart';
 
 class FleetDashboard extends StatefulWidget {
   const FleetDashboard({super.key});
@@ -107,7 +108,7 @@ class _FleetDashboardState extends State<FleetDashboard> {
     final bikes = _motos.length;
 
     return Card(
-      color: Colors.blueGrey[50],
+      color: AppColors.background,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -119,17 +120,29 @@ class _FleetDashboardState extends State<FleetDashboard> {
               children: [
                 const Text(
                   'Jornadas hoy',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.navy,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                Text('Motos: $bikes'),
+                Text(
+                  'Motos: $bikes',
+                  style: const TextStyle(color: AppColors.textGray),
+                ),
               ],
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('Días adeudados: $daysOwed'),
-                  Text('Deuda total: C\$$totalDebt'),
+                Text(
+                  'Días adeudados: $daysOwed',
+                  style: const TextStyle(color: AppColors.warningYellow),
+                ),
+                Text(
+                  'Deuda total: C\$$totalDebt',
+                  style: const TextStyle(color: AppColors.coral),
+                ),
               ],
             ),
           ],
@@ -261,7 +274,10 @@ class _FleetDashboardState extends State<FleetDashboard> {
             },
             icon: const Icon(Icons.payments_outlined),
             label: const Text('Pagos'),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.successGreen,
+              foregroundColor: Colors.white,
+            ),
           ),
         ),
         const SizedBox(height: 12),
