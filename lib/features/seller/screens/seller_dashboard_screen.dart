@@ -7,6 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'seller_profile_screen.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SellerDashboardScreen extends StatefulWidget {
   const SellerDashboardScreen({super.key});
@@ -124,22 +125,29 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
               if (uid == null) return;
               final messenger = ScaffoldMessenger.of(context);
               final csv = await SellerMetricsService.exportCsv(uid, _range.start, _range.end);
-              try {
-                Directory? dir;
                 try {
-                  dir = await getDownloadsDirectory();
-                } catch (_) {
-                  dir = null;
+                  Directory? dir;
+                  try {
+                    dir = await getDownloadsDirectory();
+                  } catch (_) {
+                    dir = null;
+                  }
+                  dir ??= await getApplicationDocumentsDirectory();
+                  final file = File('${dir.path}/merca_nica_sales_${uid}_${DateTime.now().millisecondsSinceEpoch}.csv');
+                  await file.writeAsString(csv);
+                  if (!mounted) return;
+                  messenger.showSnackBar(SnackBar(content: Text('CSV guardado: ${file.path}')));
+                  // Offer to open/share the file
+                  try {
+                    await Share.shareXFiles([XFile(file.path)], text: 'Exportación de ventas');
+                  } catch (e) {
+                    // Share failed; nothing critical — already saved
+                    messenger.showSnackBar(SnackBar(content: Text('No se pudo compartir: $e')));
+                  }
+                } catch (e) {
+                  if (!mounted) return;
+                  messenger.showSnackBar(SnackBar(content: Text('Error guardando CSV: $e')));
                 }
-                dir ??= await getApplicationDocumentsDirectory();
-                final file = File('${dir.path}/merca_nica_sales_${uid}_${DateTime.now().millisecondsSinceEpoch}.csv');
-                await file.writeAsString(csv);
-                if (!mounted) return;
-                messenger.showSnackBar(SnackBar(content: Text('CSV guardado: ${file.path}')));
-              } catch (e) {
-                if (!mounted) return;
-                messenger.showSnackBar(SnackBar(content: Text('Error guardando CSV: $e')));
-              }
             },
           ),
           IconButton(
