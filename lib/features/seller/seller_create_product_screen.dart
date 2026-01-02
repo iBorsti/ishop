@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/auth/models/app_user.dart';
 import '../../core/auth/state/auth_controller.dart';
@@ -19,25 +22,78 @@ class SellerCreateProductScreen extends StatefulWidget {
 
 class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _titleCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
   final _priceCtrl = TextEditingController();
+  final _imageUrlCtrl = TextEditingController();
   bool _saving = false;
+  static const _kDraftKeyPrefix = 'seller_product_draft_';
 
   @override
   void initState() {
     super.initState();
     if (widget.initial != null) {
+      _titleCtrl.text = widget.initial!.title ?? '';
       _descriptionCtrl.text = widget.initial!.description;
       final p = widget.initial!.price;
       if (p != null) _priceCtrl.text = p.toStringAsFixed(0);
+      _imageUrlCtrl.text = widget.initial!.imageUrl ?? '';
+    } else {
+      _restoreDraft();
     }
+    _imageUrlCtrl.addListener(() => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final route = ModalRoute.of(context);
+      if (route != null) route.addScopedWillPopCallback(_handleWillPop);
+    });
   }
 
   @override
   void dispose() {
+    final route = ModalRoute.of(context);
+    if (route != null) route.removeScopedWillPopCallback(_handleWillPop);
+    _titleCtrl.dispose();
     _descriptionCtrl.dispose();
     _priceCtrl.dispose();
+    _imageUrlCtrl.dispose();
     super.dispose();
+  }
+
+  Future<bool> _handleWillPop() async {
+    await _saveDraft();
+    return true;
+  }
+
+  String get _draftKey => '$_kDraftKeyPrefix${widget.initial?.id ?? 'new'}';
+
+  Future<void> _restoreDraft() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_draftKey);
+      if (raw == null) return;
+      final map = json.decode(raw) as Map<String, dynamic>;
+      _titleCtrl.text = map['title'] as String? ?? '';
+      _descriptionCtrl.text = map['description'] as String? ?? '';
+      _priceCtrl.text = (map['price'] as Object?)?.toString() ?? '';
+      _imageUrlCtrl.text = map['imageUrl'] as String? ?? '';
+      setState(() {});
+    } catch (_) {}
+  }
+
+  Future<void> _saveDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    final map = {
+      'title': _titleCtrl.text,
+      'description': _descriptionCtrl.text,
+      'price': _priceCtrl.text,
+      'imageUrl': _imageUrlCtrl.text,
+    };
+    await prefs.setString(_draftKey, json.encode(map));
+  }
+
+  Future<void> _clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_draftKey);
   }
 
   Future<void> _submit() async {
@@ -52,34 +108,49 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
       );
       return;
     }
+    final title = _titleCtrl.text.trim();
     final description = _descriptionCtrl.text.trim();
     final price = double.parse(_priceCtrl.text.trim());
+    final imageUrl = _imageUrlCtrl.text.trim().isEmpty ? null : _imageUrlCtrl.text.trim();
 
     setState(() => _saving = true);
-    if (widget.initial == null) {
-      await SellerPostService.createProduct(
-        userId: userId,
-        description: description,
-        price: price,
-        sellerName: user?.name ?? 'Vendedor',
-      );
-    } else {
-      await SellerPostService.updatePost(
-        userId: userId,
-        postId: widget.initial!.id,
-        description: description,
-        price: price,
-        sellerName: user?.name,
-        sellerId: user?.id,
-      );
+    try {
+      if (widget.initial == null) {
+        await SellerPostService.createProduct(
+          userId: userId,
+          title: title.isEmpty ? null : title,
+          description: description,
+          price: price,
+          imageUrl: imageUrl,
+          sellerName: user?.name ?? 'Vendedor',
+        );
+      } else {
+        await SellerPostService.updatePost(
+          userId: userId,
+          postId: widget.initial!.id,
+          title: title.isEmpty ? null : title,
+          description: description,
+          price: price,
+          imageUrl: imageUrl,
+          sellerName: user?.name,
+          sellerId: user?.id,
+        );
+      }
+      await _clearDraft();
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
-    if (!mounted) return;
-    Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.initial != null;
+
     return RoleGuard(
       requiredRole: UserRole.seller,
       child: Scaffold(
@@ -94,6 +165,12 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  TextFormField(
+                    controller: _titleCtrl,
+                    decoration: const InputDecoration(labelText: 'Título'),
+                    validator: (v) => v == null || v.trim().isEmpty ? 'Ingresa un título' : null,
+                  ),
+                  const SizedBox(height: 12),
                   TextFormField(
                     controller: _descriptionCtrl,
                     maxLines: 3,
@@ -125,12 +202,28 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
                       return null;
                     },
                   ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _imageUrlCtrl,
+                    decoration: const InputDecoration(labelText: 'URL imagen (opcional)'),
+                  ),
+                  const SizedBox(height: 12),
+                  if (_imageUrlCtrl.text.isNotEmpty)
+                    Center(
+                      child: SizedBox(
+                        height: 140,
+                        child: Image.network(
+                          _imageUrlCtrl.text,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 64),
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _saving ? null : _submit,
-                      style: isEdit ? AppButtonStyles.success : null,
                       child: _saving
                           ? const SizedBox(
                               height: 18,
@@ -138,6 +231,7 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(isEdit ? 'Guardar cambios' : 'Publicar'),
+                      style: isEdit ? AppButtonStyles.success : null,
                     ),
                   ),
                 ],

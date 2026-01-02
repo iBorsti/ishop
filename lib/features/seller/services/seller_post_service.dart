@@ -64,14 +64,18 @@ class SellerPostService {
 
   static Future<SellerPost> createProduct({
     required String userId,
+    String? title,
     required String description,
     required double price,
+    String? imageUrl,
     required String sellerName,
   }) async {
     final post = SellerPost(
       id: 'post_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(9999)}',
       type: SellerPostType.product,
+      title: title,
       description: description,
+      imageUrl: imageUrl,
       price: price,
       createdAt: DateTime.now(),
       active: true,
@@ -109,18 +113,24 @@ class SellerPostService {
   static Future<void> updatePost({
     required String userId,
     required String postId,
+    String? title,
     required String description,
     double? price,
+    String? imageUrl,
     String? sellerName,
     String? sellerId,
+    bool? active,
   }) async {
     final items = await _loadAll(userId);
     final idx = items.indexWhere((p) => p.id == postId);
     if (idx == -1) return;
     items[idx] = items[idx]
         .copyWith(
+          title: title,
           description: description,
+          imageUrl: imageUrl,
           price: price,
+          active: active,
           sellerName: sellerName,
           sellerId: sellerId,
         );
