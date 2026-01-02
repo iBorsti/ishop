@@ -124,9 +124,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
-                      ),
                       onPressed: _loading ? null : _create,
                       child: _loading
                           ? const CircularProgressIndicator()

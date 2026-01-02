@@ -110,10 +110,6 @@ class SellerDashboard extends StatelessWidget {
                           },
                           icon: const Icon(Icons.post_add),
                           label: const Text('Publicar producto'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.turquoise,
-                            foregroundColor: Colors.white,
-                          ),
                         ),
                       ),
                     ),

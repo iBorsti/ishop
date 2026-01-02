@@ -130,11 +130,6 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _saving ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            isEdit ? AppColors.successGreen : AppColors.turquoise,
-                        foregroundColor: Colors.white,
-                      ),
                       child: _saving
                           ? const SizedBox(
                               height: 18,
@@ -142,6 +137,12 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(isEdit ? 'Guardar cambios' : 'Publicar'),
+                      style: isEdit
+                          ? ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.successGreen,
+                              foregroundColor: Colors.white,
+                            )
+                          : null,
                     ),
                   ),
                 ],

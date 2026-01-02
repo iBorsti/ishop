@@ -186,12 +186,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             SizedBox(
                               height: 48,
                               child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryBlue,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
                                 onPressed: _loading ? null : _submit,
                                 child: _loading
                                     ? const SizedBox(

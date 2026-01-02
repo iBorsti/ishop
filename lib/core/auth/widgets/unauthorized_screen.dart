@@ -25,9 +25,6 @@ class UnauthorizedScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                  ),
                   onPressed: () => AuthController.instance.logout(),
                   child: const Text('Volver al inicio'),
                 ),

@@ -301,10 +301,6 @@ class _QuickActions extends StatelessWidget {
             onPressed: onProduct,
             icon: const Icon(Icons.add_box),
             label: const Text('Publicar producto'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.turquoise,
-              foregroundColor: Colors.white,
-            ),
           ),
         ),
         const SizedBox(width: 12),
