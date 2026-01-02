@@ -13,6 +13,7 @@ import 'models/seller_post.dart';
 import 'services/seller_post_service.dart';
 import 'seller_create_discount_screen.dart';
 import 'seller_create_product_screen.dart';
+import 'screens/seller_dashboard_screen.dart';
 
 class SellerHomeScreen extends StatefulWidget {
   const SellerHomeScreen({super.key});
@@ -101,7 +102,16 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Vendedor'),
-          actions: const [LogoutButton()],
+          actions: [
+            IconButton(
+              tooltip: 'Panel de control',
+              icon: const Icon(Icons.insights_outlined),
+              onPressed: () async {
+                await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SellerDashboardScreen()));
+              },
+            ),
+            const LogoutButton(),
+          ],
         ),
         body: SafeArea(
           child: RefreshIndicator(
