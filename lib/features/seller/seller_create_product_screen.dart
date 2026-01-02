@@ -61,7 +61,7 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
     return true;
   }
 
-  String get _draftKey => '$_kDraftKeyPrefix${widget.initial?.id ?? 'new'}';
+  String get _draftKey => '$_kDraftKeyPrefix${widget.initial?.id ?? "new"}';
 
   Future<void> _restoreDraft() async {
     try {
@@ -147,6 +147,7 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.initial != null;
+
     return RoleGuard(
       requiredRole: UserRole.seller,
       child: WillPopScope(
@@ -162,77 +163,74 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                  TextFormField(
-                    controller: _titleCtrl,
-                    decoration: const InputDecoration(labelText: 'Título'),
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Ingresa un título' : null,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _descriptionCtrl,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Descripción',
-                      hintText: 'Ej. Combo de pollo frito',
+                  children: <Widget>[
+                    TextFormField(
+                      controller: _titleCtrl,
+                      decoration: const InputDecoration(labelText: 'Título'),
+                      validator: (v) => v == null || v.trim().isEmpty ? 'Ingresa un título' : null,
                     ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return 'Ingresa una descripción';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _priceCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Precio',
-                      prefixText: 'C\$ ',
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _descriptionCtrl,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: 'Descripción',
+                        hintText: 'Ej. Combo de pollo frito',
+                      ),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) return 'Ingresa una descripción';
+                        return null;
+                      },
                     ),
-                    validator: (v) {
-                      final txt = v?.trim() ?? '';
-                      final value = double.tryParse(txt);
-                      if (value == null || value <= 0) {
-                        return 'Ingresa un precio válido';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _imageUrlCtrl,
-                    decoration: const InputDecoration(labelText: 'URL imagen (opcional)'),
-                  ),
-                  const SizedBox(height: 12),
-                  if (_imageUrlCtrl.text.isNotEmpty)
-                    Center(
-                      child: SizedBox(
-                        height: 140,
-                        child: Image.network(
-                          _imageUrlCtrl.text,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 64),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _priceCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Precio',
+                        prefixText: 'C\$ ',
+                      ),
+                      validator: (v) {
+                        final txt = v?.trim() ?? '';
+                        final value = double.tryParse(txt);
+                        if (value == null || value <= 0) return 'Ingresa un precio válido';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _imageUrlCtrl,
+                      decoration: const InputDecoration(labelText: 'URL imagen (opcional)'),
+                    ),
+                    const SizedBox(height: 12),
+                    if (_imageUrlCtrl.text.isNotEmpty)
+                      Center(
+                        child: SizedBox(
+                          height: 140,
+                          child: Image.network(
+                            _imageUrlCtrl.text,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 64),
+                          ),
                         ),
                       ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _saving ? null : _submit,
+                        child: _saving
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(isEdit ? 'Guardar cambios' : 'Publicar'),
+                        style: isEdit ? AppButtonStyles.success : null,
+                      ),
                     ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _saving ? null : _submit,
-                      child: _saving
-                          ? const SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(isEdit ? 'Guardar cambios' : 'Publicar'),
-                      style: isEdit ? AppButtonStyles.success : null,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
