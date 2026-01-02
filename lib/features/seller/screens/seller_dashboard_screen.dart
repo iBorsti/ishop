@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/auth/state/auth_controller.dart';
+import '../../../core/auth/models/seller_profile.dart';
+import 'seller_profile_screen.dart';
+
 class SellerDashboardScreen extends StatefulWidget {
   const SellerDashboardScreen({super.key});
 
@@ -17,6 +21,9 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   double _ingresos = 0.0;
   double _conversion = 0.0;
   List<int> _daily = [];
+  // Detalle para business
+  int _customers = 0;
+  List<Map<String, Object>> _topProducts = [];
 
   @override
   void initState() {
@@ -31,6 +38,13 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     _ventas = _daily.fold(0, (a, b) => a + b);
     _ingresos = _ventas * 120.5; // ejemplo
     _conversion = (_ventas / (100 + days * 5)) * 100;
+    // mock extra
+    _customers = (_ventas * 3) ~/ 4;
+    _topProducts = [
+      {'name': 'Producto A', 'count': 34},
+      {'name': 'Producto B', 'count': 22},
+      {'name': 'Producto C', 'count': 12},
+    ];
     setState(() {});
   }
 
@@ -82,8 +96,34 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final profile = AuthController.instance.sellerProfile;
+    final isBusiness = profile?.type == SellerType.business;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Panel de control')),
+      appBar: AppBar(
+        title: const Text('Panel de control'),
+        actions: [
+          if (profile != null && profile.logoUrl != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundImage: NetworkImage(profile.logoUrl!),
+                onBackgroundImageError: (_, __) {},
+              ),
+            ),
+          IconButton(
+            tooltip: 'Editar perfil vendedor',
+            icon: const Icon(Icons.person),
+            onPressed: () async {
+              final res = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(builder: (_) => const SellerProfileScreen()),
+              );
+              if (res == true) setState(() {});
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -122,7 +162,18 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
                   _kpiCard('Conversión', '${_conversion.toStringAsFixed(1)}%', color: Colors.indigo),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
+              if (isBusiness) ...[
+                Row(
+                  children: [
+                    _kpiCard('Clientes (mes)', '$_customers', color: Colors.orange),
+                    const SizedBox(width: 8),
+                    _kpiCard('Top producto', '${_topProducts.isNotEmpty ? _topProducts.first['name'] : '-'}', color: Colors.purple),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
+              const SizedBox(height: 8),
               Expanded(
                 child: Card(
                   child: Padding(
@@ -154,6 +205,21 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
                             }).toList(),
                           ),
                         ),
+                        const SizedBox(height: 12),
+                        if (isBusiness) ...[
+                          const Divider(),
+                          Text('Productos más vendidos', style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 8),
+                          for (final p in _topProducts)
+                            ListTile(
+                              dense: true,
+                              title: Text(p['name'] as String),
+                              trailing: Text('${p['count']}'),
+                            ),
+                        ] else ...[
+                          const SizedBox(height: 8),
+                          Text('Resumen simplificado para vendedor independiente', style: Theme.of(context).textTheme.bodyMedium),
+                        ],
                       ],
                     ),
                   ),
