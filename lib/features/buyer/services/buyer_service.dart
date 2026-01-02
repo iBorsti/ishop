@@ -10,6 +10,7 @@ class BuyerService {
         price: 120,
         imageUrl: '',
         sellerName: 'Doña Marta',
+        sellerId: 'seller_1',
       ),
       Product(
         id: '2',
@@ -18,6 +19,7 @@ class BuyerService {
         price: 250,
         imageUrl: '',
         sellerName: 'Pollos El Buen Sabor',
+        sellerId: 'seller_2',
       ),
     ];
   }

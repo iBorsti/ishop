@@ -3,12 +3,14 @@ class CartItem {
   final String name;
   final double price;
   int quantity;
+  final String sellerId;
 
   CartItem({
     required this.id,
     required this.name,
     required this.price,
     this.quantity = 1,
+    this.sellerId = '',
   });
 
   double get total => price * quantity;
@@ -19,6 +21,7 @@ class CartItem {
       'name': name,
       'price': price,
       'quantity': quantity,
+      'sellerId': sellerId,
     };
   }
 
@@ -28,6 +31,7 @@ class CartItem {
       name: map['name'] as String,
       price: (map['price'] as num).toDouble(),
       quantity: (map['quantity'] as int?) ?? 1,
+      sellerId: map['sellerId'] as String? ?? '',
     );
   }
 }

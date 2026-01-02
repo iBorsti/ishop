@@ -43,12 +43,12 @@ class CartService extends ChangeNotifier {
 
   List<CartItem> get items => List.unmodifiable(_items);
 
-  void addItem({required String id, required String name, required double price}) {
-    final i = _items.indexWhere((e) => e.id == id);
+  void addItem({required String id, required String name, required double price, String sellerId = ''}) {
+    final i = _items.indexWhere((e) => e.id == id && e.sellerId == sellerId);
     if (i >= 0) {
       _items[i].quantity += 1;
     } else {
-      _items.add(CartItem(id: id, name: name, price: price));
+      _items.add(CartItem(id: id, name: name, price: price, sellerId: sellerId));
     }
     notifyListeners();
     _persist();

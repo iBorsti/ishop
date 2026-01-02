@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../buyer/services/cart_service.dart';
+import '../../buyer/models/cart_item.dart';
+import '../../seller/services/seller_metrics_service.dart';
+import '../../orders/models/order.dart';
+import '../../orders/services/order_service.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -90,6 +94,26 @@ class _CartScreenState extends State<CartScreen> {
                           );
                           if (confirmed == true) {
                             if (!mounted) return;
+                            // Crear pedido y registrar ventas por vendedor antes de vaciar carrito
+                            final now = DateTime.now();
+                            final orderId = 'ord_${now.millisecondsSinceEpoch}';
+                            final orderItems = items.map((it) => OrderItem(productId: it.id, name: it.name, price: it.price, quantity: it.quantity, sellerId: it.sellerId)).toList();
+                            final orderTotal = items.fold<double>(0.0, (p, e) => p + e.total);
+                            final order = Order(id: orderId, buyerId: '', items: orderItems, total: orderTotal, status: OrderStatus.newOrder, createdAt: now);
+                            await OrderService.createOrder(order);
+
+                            for (final it in items) {
+                              final event = SaleEvent(
+                                id: '${now.microsecondsSinceEpoch}_${it.id}',
+                                sellerId: it.sellerId,
+                                productId: it.id,
+                                productName: it.name,
+                                amount: it.total,
+                                quantity: it.quantity,
+                                createdAt: now,
+                              );
+                              await SellerMetricsService.recordSale(event);
+                            }
                             cart.clear();
                             messenger.showSnackBar(const SnackBar(content: Text('Pedido enviado a repartidores')));
                             nav.pop();

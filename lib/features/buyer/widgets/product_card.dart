@@ -84,7 +84,12 @@ class ProductCard extends StatelessWidget {
                     children: [
                           TextButton.icon(
                             onPressed: () {
-                              CartService.instance.addItem(id: product.id, name: product.name, price: product.price.toDouble());
+                              CartService.instance.addItem(
+                                id: product.id,
+                                name: product.name,
+                                price: product.price.toDouble(),
+                                sellerId: product.sellerId,
+                              );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: const Text('Añadido al carrito'),

@@ -42,16 +42,13 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
       _restoreDraft();
     }
     _imageUrlCtrl.addListener(() => setState(() {}));
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final route = ModalRoute.of(context);
-      if (route != null) route.addScopedWillPopCallback(_handleWillPop);
-    });
+    // Usaremos WillPopScope en el build para manejar el guardado del borrador
+    // y evitar el uso de las APIs de pop registradas en la ruta.
   }
 
   @override
   void dispose() {
-    final route = ModalRoute.of(context);
-    if (route != null) route.removeScopedWillPopCallback(_handleWillPop);
+    // No es necesario remover callbacks de ruta — WillPopScope gestiona el pop.
     _titleCtrl.dispose();
     _descriptionCtrl.dispose();
     _priceCtrl.dispose();
@@ -150,21 +147,22 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.initial != null;
-
     return RoleGuard(
       requiredRole: UserRole.seller,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(isEdit ? 'Editar producto' : 'Publicar producto'),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      child: WillPopScope(
+        onWillPop: _handleWillPop,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(isEdit ? 'Editar producto' : 'Publicar producto'),
+          ),
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   TextFormField(
                     controller: _titleCtrl,
                     decoration: const InputDecoration(labelText: 'Título'),

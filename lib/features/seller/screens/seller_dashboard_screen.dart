@@ -5,6 +5,7 @@ import '../../../core/auth/models/seller_profile.dart';
 import '../services/seller_metrics_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'seller_profile_screen.dart';
+import 'seller_orders_screen.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -148,6 +149,13 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
                   if (!mounted) return;
                   messenger.showSnackBar(SnackBar(content: Text('Error guardando CSV: $e')));
                 }
+            },
+          ),
+          IconButton(
+            tooltip: 'Pedidos',
+            icon: const Icon(Icons.list_alt),
+            onPressed: () async {
+              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SellerOrdersScreen()));
             },
           ),
           IconButton(
