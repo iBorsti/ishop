@@ -104,13 +104,19 @@ class MandaditoService {
           (m) => m.status == MandaditoStatus.taken && m.takenBy == deliveryId,
         )
         .toList();
-    return DeliveryMandaditoLists(open: open, mine: mine);
+    final completed = items
+        .where(
+          (m) => m.status == MandaditoStatus.completed && m.takenBy == deliveryId,
+        )
+        .toList();
+    return DeliveryMandaditoLists(open: open, mine: mine, completed: completed);
   }
 }
 
 class DeliveryMandaditoLists {
   final List<Mandadito> open;
   final List<Mandadito> mine;
+  final List<Mandadito> completed;
 
-  const DeliveryMandaditoLists({required this.open, required this.mine});
+  const DeliveryMandaditoLists({required this.open, required this.mine, required this.completed});
 }

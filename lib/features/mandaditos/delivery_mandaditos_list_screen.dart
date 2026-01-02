@@ -121,8 +121,9 @@ class _DeliveryMandaditosListScreenState
                 ),
               );
             }
-            final data = snapshot.data ?? const DeliveryMandaditoLists(open: [], mine: []);
-            if (data.open.isEmpty && data.mine.isEmpty) {
+            final data = snapshot.data ??
+                const DeliveryMandaditoLists(open: [], mine: [], completed: []);
+            if (data.open.isEmpty && data.mine.isEmpty && data.completed.isEmpty) {
               return RefreshIndicator(
                 onRefresh: _refresh,
                 child: ListView(
@@ -138,31 +139,50 @@ class _DeliveryMandaditosListScreenState
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  _DeliverySummary(
+                    mineCount: data.mine.length,
+                    openCount: data.open.length,
+                    completedCount: data.completed.length,
+                  ),
+                  const SizedBox(height: 16),
                   if (data.mine.isNotEmpty) ...[
-                    const Text(
-                      'Tomados por ti',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                    const _SectionTitle('Tomados por ti'),
                     const SizedBox(height: 8),
-                    ...data.mine.map((item) => _MandaditoCard(
-                          item: item,
-                          primaryActionLabel: 'Marcar como completado',
-                          onPrimaryAction: _completing ? null : () => _complete(item.id),
-                          actionColor: Colors.green,
-                        )),
+                    ...data.mine.map(
+                      (item) => _MandaditoCard(
+                        item: item,
+                        primaryActionLabel: 'Marcar como completado',
+                        onPrimaryAction:
+                            _completing ? null : () => _complete(item.id),
+                        actionColor: Colors.green,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                   ],
-                  if (data.open.isNotEmpty) ...[
-                    const Text(
-                      'Abiertos',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  if (data.completed.isNotEmpty) ...[
+                    const _SectionTitle('Completados'),
+                    const SizedBox(height: 8),
+                    ...data.completed.map(
+                      (item) => _MandaditoCard(
+                        item: item,
+                        primaryActionLabel: 'Completado',
+                        onPrimaryAction: null,
+                        actionColor: Colors.grey,
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    ...data.open.map((item) => _MandaditoCard(
-                          item: item,
-                          primaryActionLabel: 'Aceptar',
-                          onPrimaryAction: _taking ? null : () => _confirmAndTake(item.id),
-                        )),
+                  ],
+                  if (data.open.isNotEmpty) ...[
+                    const _SectionTitle('Abiertos'),
+                    const SizedBox(height: 8),
+                    ...data.open.map(
+                      (item) => _MandaditoCard(
+                        item: item,
+                        primaryActionLabel: 'Aceptar',
+                        onPrimaryAction:
+                            _taking ? null : () => _confirmAndTake(item.id),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -189,55 +209,54 @@ class _MandaditoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              item.description,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text('${item.origin} → ${item.destination}'),
-            const SizedBox(height: 8),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: item.urgent
-                        ? Colors.orange.shade100
-                        : Colors.green.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                Expanded(
                   child: Text(
-                    item.urgent ? 'Urgente' : 'Normal',
-                    style: TextStyle(
-                      color: item.urgent
-                          ? Colors.orange.shade800
-                          : Colors.green.shade800,
-                    ),
+                    item.description,
+                    style: theme.textTheme.titleMedium,
                   ),
                 ),
-                if (item.budget != null) ...[
-                  const SizedBox(width: 8),
-                  Text('Presupuesto: C\$ ${item.budget!.toStringAsFixed(0)}'),
-                ],
+                _StatusPill(
+                  label: item.urgent ? 'Urgente' : 'Normal',
+                  color: item.urgent ? Colors.orange.shade600 : scheme.primary,
+                    background: item.urgent
+                      ? Colors.orange.shade50
+                      : scheme.primary.withValues(alpha: 0.12),
+                ),
               ],
             ),
             const SizedBox(height: 12),
+            _InfoRow(
+              icon: Icons.place_outlined,
+              iconColor: scheme.primary,
+              label: item.origin,
+            ),
+            const SizedBox(height: 6),
+            _InfoRow(
+              icon: Icons.flag_outlined,
+              iconColor: scheme.secondary,
+              label: item.destination,
+            ),
+            if (item.budget != null) ...[
+              const SizedBox(height: 10),
+              _InfoPill(
+                icon: Icons.payments_outlined,
+                text: 'Presupuesto: C\$ ${item.budget!.toStringAsFixed(0)}',
+              ),
+            ],
+            const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -251,6 +270,193 @@ class _MandaditoCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+
+  const _InfoRow({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: iconColor),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyLarge,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoPill extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _InfoPill({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: scheme.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: scheme.primary),
+          const SizedBox(width: 6),
+          Text(text),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final String label;
+  final Color color;
+  final Color background;
+
+  const _StatusPill({
+    required this.label,
+    required this.color,
+    required this.background,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _DeliverySummary extends StatelessWidget {
+  final int mineCount;
+  final int openCount;
+  final int completedCount;
+
+  const _DeliverySummary({
+    required this.mineCount,
+    required this.openCount,
+    required this.completedCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            _SummaryItem(
+              label: 'Tomados',
+              value: mineCount,
+              color: scheme.primary,
+            ),
+            _SummaryItem(
+              label: 'Abiertos',
+              value: openCount,
+              color: scheme.secondary,
+            ),
+            _SummaryItem(
+              label: 'Completados',
+              value: completedCount,
+              color: Colors.grey.shade600,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryItem extends StatelessWidget {
+  final String label;
+  final int value;
+  final Color color;
+
+  const _SummaryItem({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: theme.textTheme.bodyMedium),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                value.toString(),
+                style: theme.textTheme.titleMedium?.copyWith(color: color),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      text,
+      style: theme.textTheme.titleMedium,
     );
   }
 }

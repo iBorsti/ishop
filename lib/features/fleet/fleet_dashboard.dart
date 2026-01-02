@@ -129,7 +129,7 @@ class _FleetDashboardState extends State<FleetDashboard> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text('Días adeudados: $daysOwed'),
-                Text('Deuda total: C\$${totalDebt}'),
+                  Text('Deuda total: C\$$totalDebt'),
               ],
             ),
           ],

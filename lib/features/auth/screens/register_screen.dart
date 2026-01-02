@@ -57,6 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     } catch (e) {
       final msg = e is AuthException ? e.message : 'No se pudo registrar';
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } finally {
       if (mounted) setState(() => _loading = false);

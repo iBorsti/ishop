@@ -44,6 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } catch (e) {
       final msg = e is AuthException ? e.message : 'No se pudo iniciar sesión';
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -55,11 +56,11 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _ctrl.loginDemo(role);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Sesión demo: ${role.name}')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Sesión demo: ${role.name}')));
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('No se pudo iniciar demo')));

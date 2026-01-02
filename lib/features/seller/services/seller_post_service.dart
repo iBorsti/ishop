@@ -10,17 +10,20 @@ class BuyerHighlight {
   final String description;
   final String sellerName;
   final DateTime createdAt;
+  final String sellerId;
 
   const BuyerHighlight({
     required this.description,
     required this.sellerName,
     required this.createdAt,
+    required this.sellerId,
   });
 
   Map<String, dynamic> toJson() => {
         'description': description,
         'sellerName': sellerName,
         'createdAt': createdAt.toIso8601String(),
+        'sellerId': sellerId,
       };
 
   factory BuyerHighlight.fromJson(Map<String, dynamic> json) {
@@ -29,6 +32,7 @@ class BuyerHighlight {
       sellerName: json['sellerName'] as String? ?? 'Vendedor',
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
+      sellerId: json['sellerId'] as String? ?? '',
     );
   }
 }
@@ -72,6 +76,7 @@ class SellerPostService {
       createdAt: DateTime.now(),
       active: true,
       sellerName: sellerName,
+      sellerId: userId,
     );
     final items = await _loadAll(userId);
     items.insert(0, post);
@@ -92,6 +97,7 @@ class SellerPostService {
       createdAt: DateTime.now(),
       active: true,
       sellerName: sellerName,
+      sellerId: userId,
     );
     final items = await _loadAll(userId);
     items.insert(0, post);
@@ -106,12 +112,18 @@ class SellerPostService {
     required String description,
     double? price,
     String? sellerName,
+    String? sellerId,
   }) async {
     final items = await _loadAll(userId);
     final idx = items.indexWhere((p) => p.id == postId);
     if (idx == -1) return;
     items[idx] = items[idx]
-        .copyWith(description: description, price: price, sellerName: sellerName);
+        .copyWith(
+          description: description,
+          price: price,
+          sellerName: sellerName,
+          sellerId: sellerId,
+        );
     await _saveAll(userId, items);
   }
 
@@ -129,9 +141,10 @@ class SellerPostService {
     final raw = prefs.getString(_highlightKey());
     if (raw == null) return [];
     final data = jsonDecode(raw) as List<dynamic>;
-    return data
+    final list = data
         .map((e) => BuyerHighlight.fromJson(e as Map<String, dynamic>))
         .toList();
+    return _filterByOpen(list);
   }
 
   static Future<void> _addHighlight(SellerPost post) async {
@@ -151,10 +164,25 @@ class SellerPostService {
         description: post.description,
         sellerName: post.sellerName,
         createdAt: post.createdAt,
+        sellerId: post.sellerId,
       ),
     );
     if (current.length > 10) current = current.sublist(0, 10);
     final raw = jsonEncode(current.map((e) => e.toJson()).toList());
     await prefs.setString(_highlightKey(), raw);
+  }
+
+  static Future<List<BuyerHighlight>> _filterByOpen(
+    List<BuyerHighlight> list,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final result = <BuyerHighlight>[];
+    for (final h in list) {
+      if (h.sellerId.isEmpty) continue;
+      final key = 'seller_open_${AppConfig.env.name}_${h.sellerId}';
+      final isOpen = prefs.getBool(key) ?? true;
+      if (isOpen) result.add(h);
+    }
+    return result;
   }
 }

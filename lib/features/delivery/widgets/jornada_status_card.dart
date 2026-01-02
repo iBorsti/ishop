@@ -126,6 +126,7 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                         widget.onChanged?.call();
                       } catch (_) {
                         if (!mounted) return;
+                        // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -175,6 +176,7 @@ class _JornadaStatusCardState extends State<JornadaStatusCard> {
                           widget.onChanged?.call();
                         } catch (_) {
                           if (!mounted) return;
+                          // ignore: use_build_context_synchronously
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(

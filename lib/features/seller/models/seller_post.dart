@@ -11,6 +11,7 @@ class SellerPost {
   final DateTime createdAt;
   final bool active;
   final String sellerName;
+  final String sellerId;
 
   const SellerPost({
     required this.id,
@@ -20,6 +21,7 @@ class SellerPost {
     required this.createdAt,
     required this.active,
     required this.sellerName,
+    required this.sellerId,
   });
 
   SellerPost copyWith({
@@ -27,6 +29,7 @@ class SellerPost {
     double? price,
     bool? active,
     String? sellerName,
+    String? sellerId,
   }) {
     return SellerPost(
       id: id,
@@ -36,6 +39,7 @@ class SellerPost {
       createdAt: createdAt,
       active: active ?? this.active,
       sellerName: sellerName ?? this.sellerName,
+      sellerId: sellerId ?? this.sellerId,
     );
   }
 
@@ -47,6 +51,7 @@ class SellerPost {
         'createdAt': createdAt.toIso8601String(),
         'active': active,
         'sellerName': sellerName,
+        'sellerId': sellerId,
       };
 
   factory SellerPost.fromJson(Map<String, dynamic> json) {
@@ -64,6 +69,7 @@ class SellerPost {
           DateTime.now(),
       active: json['active'] as bool? ?? true,
       sellerName: json['sellerName'] as String? ?? 'Vendedor',
+      sellerId: json['sellerId'] as String? ?? '',
     );
   }
 }

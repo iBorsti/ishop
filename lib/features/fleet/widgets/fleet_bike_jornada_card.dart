@@ -147,6 +147,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                         widget.onChanged();
                       } catch (_) {
                         if (!mounted) return;
+                        // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -197,6 +198,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
                           widget.onChanged();
                         } catch (_) {
                           if (!mounted) return;
+                          // ignore: use_build_context_synchronously
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
@@ -224,7 +226,7 @@ class _FleetBikeJornadaCardState extends State<FleetBikeJornadaCard> {
             break;
         }
 
-        return Card(
+            return Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -409,7 +411,7 @@ class _FleetBikeJornadaListState extends State<FleetBikeJornadaList> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text('Días adeudados: $daysOwed'),
-                    Text('Deuda total: C\$${totalDebt}'),
+                    Text('Deuda total: C\$$totalDebt'),
                   ],
                 ),
               ],

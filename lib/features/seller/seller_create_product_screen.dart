@@ -69,6 +69,7 @@ class _SellerCreateProductScreenState extends State<SellerCreateProductScreen> {
         description: description,
         price: price,
         sellerName: user?.name,
+        sellerId: user?.id,
       );
     }
     if (!mounted) return;

@@ -63,6 +63,7 @@ class _SellerCreateDiscountScreenState
         postId: widget.initial!.id,
         description: description,
         sellerName: user?.name,
+        sellerId: user?.id,
       );
     }
     if (!mounted) return;

@@ -119,12 +119,14 @@ class _FleetPaymentHistoryScreenState extends State<FleetPaymentHistoryScreen> {
                               amount: amount,
                               bikesCovered: bikes,
                             );
+                            // ignore: use_build_context_synchronously
                             Navigator.of(ctx).pop(true);
                           } catch (_) {
                             if (!mounted) return;
                             setInnerState(() {
                               saving = false;
                             });
+                            // ignore: use_build_context_synchronously
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
